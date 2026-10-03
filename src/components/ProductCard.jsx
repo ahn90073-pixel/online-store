@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Heart, ShoppingCart, Zap, BadgeCheck, Truck } from 'lucide-react';
+import { Heart, ShoppingCart, BadgeCheck, Truck } from 'lucide-react';
 import StarRating from './StarRating';
 export default function ProductCard({ product, onAddToCart, compact }) {
     const [isFavorite, setIsFavorite] = useState(false);
@@ -80,8 +80,7 @@ export default function ProductCard({ product, onAddToCart, compact }) {
             <ShoppingCart size={15}/>
             <span>أضف للسلة</span>
           </button>
-          {!compact && (<button onClick={handleAddToCart} className="bg-brand-700 hover:bg-brand-800 text-white text-xs md:text-sm font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-1">
-              <Zap size={15}/>
+          {!compact && (<button onClick={handleAddToCart} className="bg-brand-700 hover:bg-brand-800 text-white text-xs md:text-sm font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center">
               <span>اشترِ الآن</span>
             </button>)}
         </div>

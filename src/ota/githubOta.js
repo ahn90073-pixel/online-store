@@ -1,4 +1,4 @@
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, CapacitorHttp } from '@capacitor/core';
 import { CapacitorUpdater } from '@capgo/capacitor-updater';
 
 const OTA_MANIFEST_URL =
@@ -16,12 +16,24 @@ function isNewerVersion(nextVersion, currentVersion) {
 }
 
 async function readManifest() {
-  const response = await fetch(`${OTA_MANIFEST_URL}?t=${Date.now()}`, {
-    cache: 'no-store',
-    headers: { Accept: 'application/json' },
-  });
-  if (!response.ok) throw new Error(`OTA manifest returned ${response.status}`);
-  const manifest = await response.json();
+  const url = `${OTA_MANIFEST_URL}?t=${Date.now()}`;
+  let manifest;
+  if (Capacitor.isNativePlatform()) {
+    // GitHub redirects the release URL to release-assets.githubusercontent.com.
+    // Use the native HTTP stack so Android WebView CORS cannot block the manifest.
+    const response = await CapacitorHttp.get({
+      url,
+      headers: { Accept: 'application/json' },
+    });
+    if (response.status < 200 || response.status >= 300) {
+      throw new Error(`OTA manifest returned ${response.status}`);
+    }
+    manifest = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
+  } else {
+    const response = await fetch(url, { cache: 'no-store', headers: { Accept: 'application/json' } });
+    if (!response.ok) throw new Error(`OTA manifest returned ${response.status}`);
+    manifest = await response.json();
+  }
   if (
     manifest.appId !== 'com.ahn90073.onlinestore' ||
     !manifest.version ||

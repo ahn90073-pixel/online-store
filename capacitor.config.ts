@@ -5,6 +5,9 @@ const config: CapacitorConfig = {
   appName: 'سوق اون لين',
   webDir: 'dist',
   plugins: {
+    CapacitorHttp: {
+      enabled: true,
+    },
     CapacitorUpdater: {
       autoUpdate: false,
       appReadyTimeout: 10000,

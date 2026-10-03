@@ -28,7 +28,7 @@ jobs:
       - name: Build React web assets
         run: npm run build
 
-      - name: Typecheck
+      - name: JavaScript validation
         run: npm run typecheck
 
       - name: Lint

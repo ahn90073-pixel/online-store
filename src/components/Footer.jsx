@@ -1,29 +1,25 @@
 import { Mail, Facebook, Instagram, Twitter, MapPin, Phone, CreditCard } from 'lucide-react';
-
 const footerLinks = [
-  {
-    title: 'عن المتجر',
-    links: ['من نحن', 'تواصل معنا', 'الوظائف', 'المدونة', 'آراء العملاء'],
-  },
-  {
-    title: 'خدمة العملاء',
-    links: ['سياسة الشحن والتوصيل', 'سياسة الاسترجاع والاستبدال', 'الأسئلة الشائعة', 'تتبع طلبك', 'الدعم الفني'],
-  },
-  {
-    title: 'بيع معنا',
-    links: ['انضم كتاجر', 'دليل التاجر', 'شروط التسعير', 'العمولات والرسوم', 'تسجيل دخول التجار'],
-  },
-  {
-    title: 'الشروط والأحكام',
-    links: ['شروط الاستخدام', 'سياسة الخصوصية', 'ملفات الارتباط', 'حقوق الملكية الفكرية', 'إخلاء المسؤولية'],
-  },
+    {
+        title: 'عن المتجر',
+        links: ['من نحن', 'تواصل معنا', 'الوظائف', 'المدونة', 'آراء العملاء'],
+    },
+    {
+        title: 'خدمة العملاء',
+        links: ['سياسة الشحن والتوصيل', 'سياسة الاسترجاع والاستبدال', 'الأسئلة الشائعة', 'تتبع طلبك', 'الدعم الفني'],
+    },
+    {
+        title: 'بيع معنا',
+        links: ['انضم كتاجر', 'دليل التاجر', 'شروط التسعير', 'العمولات والرسوم', 'تسجيل دخول التجار'],
+    },
+    {
+        title: 'الشروط والأحكام',
+        links: ['شروط الاستخدام', 'سياسة الخصوصية', 'ملفات الارتباط', 'حقوق الملكية الفكرية', 'إخلاء المسؤولية'],
+    },
 ];
-
 const paymentMethods = ['Visa', 'Mastercard', 'Vodafone Cash', 'InstaPay', 'الدفع عند الاستلام'];
-
 export default function Footer() {
-  return (
-    <footer className="bg-brand-950 text-gray-300 mt-10">
+    return (<footer className="bg-brand-950 text-gray-300 mt-10">
       {/* Newsletter */}
       <div className="border-b border-white/10">
         <div className="max-w-[1400px] mx-auto px-3 md:px-6 py-6">
@@ -34,12 +30,8 @@ export default function Footer() {
             </div>
             <div className="flex items-center gap-2 w-full md:w-auto">
               <div className="flex items-center flex-1 md:w-80 bg-white rounded-lg overflow-hidden h-11">
-                <Mail size={18} className="text-gray-400 mr-3" />
-                <input
-                  type="email"
-                  placeholder="أدخل بريدك الإلكتروني"
-                  className="flex-1 h-full outline-none text-sm text-gray-800 bg-transparent"
-                />
+                <Mail size={18} className="text-gray-400 mr-3"/>
+                <input type="email" placeholder="أدخل بريدك الإلكتروني" className="flex-1 h-full outline-none text-sm text-gray-800 bg-transparent"/>
                 <button className="bg-accent-500 hover:bg-accent-600 text-white text-sm font-bold px-4 h-full transition-colors whitespace-nowrap">
                   اشترك
                 </button>
@@ -68,47 +60,43 @@ export default function Footer() {
             </p>
             <div className="flex items-center gap-3">
               <a href="#" className="w-9 h-9 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-colors" aria-label="فيسبوك">
-                <Facebook size={18} className="text-white" />
+                <Facebook size={18} className="text-white"/>
               </a>
               <a href="#" className="w-9 h-9 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-colors" aria-label="انستجرام">
-                <Instagram size={18} className="text-white" />
+                <Instagram size={18} className="text-white"/>
               </a>
               <a href="#" className="w-9 h-9 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-colors" aria-label="تويتر">
-                <Twitter size={18} className="text-white" />
+                <Twitter size={18} className="text-white"/>
               </a>
             </div>
           </div>
 
           {/* Links */}
-          {footerLinks.map((section) => (
-            <div key={section.title}>
+          {footerLinks.map((section) => (<div key={section.title}>
               <h4 className="font-bold text-white text-sm mb-3">{section.title}</h4>
               <ul className="space-y-2">
-                {section.links.map((link) => (
-                  <li key={link}>
+                {section.links.map((link) => (<li key={link}>
                     <a href="#" className="text-sm text-gray-400 hover:text-accent-400 transition-colors">
                       {link}
                     </a>
-                  </li>
-                ))}
+                  </li>))}
               </ul>
-            </div>
-          ))}
+            </div>))}
         </div>
 
         {/* Contact info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 pt-6 border-t border-white/10">
           <div className="flex items-center gap-2 text-sm">
-            <MapPin size={18} className="text-accent-400" />
+            <MapPin size={18} className="text-accent-400"/>
             <span>القاهرة، مصر - شارع التحرير، مبنى النخبة التجاري</span>
           </div>
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-2">
-              <Phone size={18} className="text-accent-400" />
+              <Phone size={18} className="text-accent-400"/>
               <span>19xxx</span>
             </div>
             <div className="flex items-center gap-2">
-              <Mail size={18} className="text-accent-400" />
+              <Mail size={18} className="text-accent-400"/>
               <span>support@al-nokhba.eg</span>
             </div>
           </div>
@@ -120,18 +108,13 @@ export default function Footer() {
         <div className="max-w-[1400px] mx-auto px-3 md:px-6 py-5">
           <div className="flex flex-col md:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <CreditCard size={18} className="text-gray-400" />
+              <CreditCard size={18} className="text-gray-400"/>
               <span className="text-sm text-gray-400">طرق الدفع المعتمدة:</span>
             </div>
             <div className="flex items-center gap-2 flex-wrap justify-center">
-              {paymentMethods.map((method) => (
-                <span
-                  key={method}
-                  className="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-200 transition-colors"
-                >
+              {paymentMethods.map((method) => (<span key={method} className="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-200 transition-colors">
                   {method}
-                </span>
-              ))}
+                </span>))}
             </div>
           </div>
         </div>
@@ -145,6 +128,5 @@ export default function Footer() {
           </p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>);
 }

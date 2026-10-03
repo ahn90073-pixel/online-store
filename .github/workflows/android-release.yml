@@ -63,7 +63,7 @@ jobs:
             -alias "$ANDROID_KEY_ALIAS" >/dev/null
           keytool -importkeystore \
             -srckeystore "$ANDROID_KEYSTORE_PATH" \
-            -srcstoretype JKS \
+            -srcstoretype PKCS12 \
             -srcstorepass "$ANDROID_KEYSTORE_PASSWORD" \
             -srcalias "$ANDROID_KEY_ALIAS" \
             -srckeypass "$ANDROID_KEY_PASSWORD" \

@@ -70,3 +70,26 @@ jobs:
             ota/SHA256SUMS.txt \
             --repo "$GITHUB_REPOSITORY" \
             --clobber
+
+      - name: Write OTA success summary
+        if: success()
+        run: |
+          set -euo pipefail
+          VERSION=$(python3 -c 'import json; print(json.load(open("ota/ota-manifest.json"))["version"])')
+          HASH=$(python3 -c 'import json; print(json.load(open("ota/ota-manifest.json"))["sha256"])')
+          COMMIT=$(python3 -c 'import json; print(json.load(open("ota/ota-manifest.json"))["commit"])')
+          {
+            echo '# OTA deployment succeeded'
+            echo
+            echo '| Item | Value |'
+            echo '|---|---|'
+            echo "| Status | ✅ Published successfully |"
+            echo "| OTA version | \`$VERSION\` |"
+            echo "| Commit | \`$COMMIT\` |"
+            echo "| SHA-256 | \`$HASH\` |"
+            echo "| Manifest | [Open manifest](https://github.com/$GITHUB_REPOSITORY/releases/download/ota-latest/ota-manifest.json) |"
+            echo "| Bundle | [Download web-bundle.zip](https://github.com/$GITHUB_REPOSITORY/releases/download/ota-latest/web-bundle.zip) |"
+            echo "| Release | [Open ota-latest](https://github.com/$GITHUB_REPOSITORY/releases/tag/ota-latest) |"
+            echo
+            echo 'The bundle is available to native apps v1.1.0 or later.'
+          } >> "$GITHUB_STEP_SUMMARY"

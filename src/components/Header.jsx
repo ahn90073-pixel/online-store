@@ -52,13 +52,12 @@ export default function Header({ onCategoryMenuClick, onCartClick, onSearch }) {
           </button>
 
           {/* Logo */}
-          <a href="#" className="flex items-center gap-2 flex-shrink-0" aria-label="سوق اون لين">
+          <a href="#" className="flex items-center flex-shrink-0" aria-label="سوق اون لين">
             <img
               src={storeIcon}
               alt="سوق اون لين"
               className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 object-contain rounded-lg"
             />
-            <span className="text-base sm:text-lg md:text-xl font-bold text-brand-800 whitespace-nowrap">مرحبا</span>
           </a>
 
           {/* Search bar - desktop */}

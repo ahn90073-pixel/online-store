@@ -2,12 +2,22 @@ name: Android Release
 
 on:
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: Git tag for the public release
+        required: true
+        default: v1.0.0
+      release_name:
+        description: Public GitHub Release title
+        required: true
+        default: Online Store v1.0.0
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   release:
+    name: Build signed Android release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,12 +38,14 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Decode Android keystore
+      - name: Decode Android upload keystore
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
+          set -euo pipefail
           test -n "$ANDROID_KEYSTORE_BASE64"
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.keystore"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.keystore"
+          test -s "$RUNNER_TEMP/release.keystore"
 
       - name: Build signed APK and AAB
         working-directory: android
@@ -44,11 +56,22 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: ./gradlew assembleRelease bundleRelease --no-daemon
 
-      - name: Upload Android artifacts
-        uses: actions/upload-artifact@v4
+      - name: Prepare release assets
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+          cp android/app/build/outputs/apk/release/*.apk release-assets/app-release.apk
+          cp android/app/build/outputs/bundle/release/*.aab release-assets/app-release.aab
+          sha256sum release-assets/* > release-assets/SHA256SUMS.txt
+
+      - name: Publish public GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: online-store-android-release
-          path: |
-            android/app/build/outputs/apk/release/*.apk
-            android/app/build/outputs/bundle/release/*.aab
-          if-no-files-found: error
+          tag_name: ${{ inputs.tag_name }}
+          name: ${{ inputs.release_name }}
+          generate_release_notes: true
+          make_latest: true
+          files: |
+            release-assets/app-release.apk
+            release-assets/app-release.aab
+            release-assets/SHA256SUMS.txt

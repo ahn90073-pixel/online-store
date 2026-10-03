@@ -48,9 +48,9 @@ export default function Footer() {
           <div className="col-span-2 lg:col-span-2">
             <div className="mb-4">
               <img
-                src="/asset/stor.jpg"
+                src="/asset/store-icon-1024.png"
                 alt="سوق اون لين"
-                className="w-48 h-24 object-contain object-right rounded-lg"
+                className="w-20 h-20 md:w-24 md:h-24 object-contain object-right rounded-lg"
               />
             </div>
             <p className="text-sm text-gray-400 leading-relaxed mb-4 max-w-sm">

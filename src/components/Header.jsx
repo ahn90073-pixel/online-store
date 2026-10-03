@@ -32,9 +32,9 @@ export default function Header({ onCategoryMenuClick, onCartClick, onSearch }) {
           {/* Logo */}
           <a href="#" className="flex items-center flex-shrink-0" aria-label="سوق اون لين">
             <img
-              src="/asset/stor.jpg"
+              src="/asset/store-icon-1024.png"
               alt="سوق اون لين"
-              className="w-24 sm:w-28 md:w-36 h-12 md:h-14 object-contain rounded-lg"
+              className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 object-contain rounded-lg"
             />
           </a>
 

@@ -46,14 +46,12 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           {/* Logo & info */}
           <div className="col-span-2 lg:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-11 h-11 bg-gradient-to-br from-brand-600 to-brand-800 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">س</span>
-              </div>
-              <div>
-                <div className="font-bold text-lg text-white">سوق اون لين</div>
-                <div className="text-[10px] text-gray-400">متجر إلكتروني</div>
-              </div>
+            <div className="mb-4">
+              <img
+                src="/asset/stor.jpg"
+                alt="سوق اون لين"
+                className="w-48 h-24 object-contain object-right rounded-lg"
+              />
             </div>
             <p className="text-sm text-gray-400 leading-relaxed mb-4 max-w-sm">
               سوق اون لين هو وجهتك الأولى للتسوق الإلكتروني في مصر. آلاف المنتجات الأصلية بأفضل الأسعار مع شحن سريع لجميع المحافظات ودفع عند الاستلام.

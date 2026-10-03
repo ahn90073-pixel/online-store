@@ -30,15 +30,12 @@ export default function Header({ onCategoryMenuClick, onCartClick, onSearch }) {
           </button>
 
           {/* Logo */}
-          <a href="#" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-9 h-9 md:w-11 md:h-11 bg-gradient-to-br from-brand-700 to-brand-900 rounded-xl flex items-center justify-center">
-              <ShoppingCart size={20} className="text-white md:hidden"/>
-              <span className="text-white font-bold text-lg hidden md:block">N</span>
-            </div>
-            <div className="hidden sm:block">
-              <div className="font-bold text-lg md:text-xl text-brand-900 leading-none">النخبة</div>
-              <div className="text-[10px] text-gray-500">متجر إلكتروني</div>
-            </div>
+          <a href="#" className="flex items-center flex-shrink-0" aria-label="سوق اون لين">
+            <img
+              src="/asset/stor.jpg"
+              alt="سوق اون لين"
+              className="w-24 sm:w-28 md:w-36 h-12 md:h-14 object-contain rounded-lg"
+            />
           </a>
 
           {/* Search bar - desktop */}

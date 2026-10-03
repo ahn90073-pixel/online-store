@@ -10,6 +10,14 @@
   font-family: var(--font-cairo), system-ui, sans-serif;
 }
 
+/* Keep every interface icon exactly as tall as the surrounding title/text. */
+svg.lucide {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
 html {
   scroll-behavior: smooth;
 }

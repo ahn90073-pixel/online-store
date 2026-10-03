@@ -31,12 +31,13 @@ export default function Header({ onCategoryMenuClick, onCartClick, onSearch }) {
           </button>
 
           {/* Logo */}
-          <a href="#" className="flex items-center flex-shrink-0" aria-label="سوق اون لين">
+          <a href="#" className="flex items-center gap-1.5 flex-shrink-0" aria-label="سوق اون لين - OTA TEST">
             <img
               src={storeIcon}
               alt="سوق اون لين"
-              className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 object-contain rounded-lg"
+              className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 object-contain rounded-lg ring-2 ring-brand-600 ring-offset-1"
             />
+            <span className="text-[9px] sm:text-[10px] font-bold text-brand-700 whitespace-nowrap">OTA TEST</span>
           </a>
 
           {/* Search bar - desktop */}

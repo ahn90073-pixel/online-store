@@ -6,11 +6,11 @@ on:
       tag_name:
         description: Git tag for the public release
         required: true
-        default: v1.2.0
+        default: v1.2.1
       release_name:
         description: Public GitHub Release title
         required: true
-        default: سوق اون لين v1.2.0
+        default: سوق اون لين v1.2.1
 
 permissions:
   contents: write

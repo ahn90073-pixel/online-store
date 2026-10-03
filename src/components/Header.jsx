@@ -11,6 +11,7 @@ export default function Header({ onCategoryMenuClick, onCartClick, onSearch }) {
     const [catDropdownOpen, setCatDropdownOpen] = useState(false);
     const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
     const [otaStatus, setOtaStatus] = useState('idle');
+    const [otaMessage, setOtaMessage] = useState('');
     const catRef = useRef(null);
     useEffect(() => {
         function handleClickOutside(e) {
@@ -27,12 +28,19 @@ export default function Header({ onCategoryMenuClick, onCartClick, onSearch }) {
     const handleOtaUpdate = async () => {
         if (otaStatus === 'checking') return;
         setOtaStatus('checking');
+        setOtaMessage('الاتصال بـ GitHub...');
         try {
-            const result = await checkForOtaUpdate({ force: true });
+            const result = await checkForOtaUpdate({
+                force: true,
+                onStatus: (message) => setOtaMessage(message),
+            });
             setOtaStatus(result.skipped ? 'native-only' : result.updated ? 'updated' : 'none');
+            if (!result.updated && !result.skipped) setOtaMessage(`لا يوجد تحديث (${result.version})`);
+            if (result.skipped) setOtaMessage('هذا الزر يعمل داخل نسخة الهاتف فقط');
         } catch (error) {
             console.warn('[OTA] Manual update failed:', error);
             setOtaStatus('error');
+            setOtaMessage(`فشل OTA: ${error?.message || 'خطأ غير معروف'}`);
         }
     };
     return (<header className="bg-white shadow-md sticky top-0 z-40">
@@ -77,15 +85,13 @@ export default function Header({ onCategoryMenuClick, onCartClick, onSearch }) {
           </div>
 
           {/* Right actions */}
-          <div className="flex items-center gap-1 md:gap-3 mr-auto md:mr-0">
+          <div className="relative flex items-center gap-1 md:gap-3 mr-auto md:mr-0">
             {/* Manual OTA update */}
             <button onClick={handleOtaUpdate} disabled={otaStatus === 'checking'} className="flex items-center gap-1 px-2 py-2 text-xs sm:text-sm font-bold text-brand-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors disabled:opacity-60" aria-label="فحص تحديث جديد" title="فحص تحديث جديد">
               <RefreshCw size={16} className={otaStatus === 'checking' ? 'animate-spin' : ''}/>
               <span className="hidden sm:inline">{otaStatus === 'checking' ? 'جاري الفحص' : 'تحديث'}</span>
             </button>
-            {otaStatus === 'none' && <span className="sr-only" role="status">لا يوجد تحديث جديد</span>}
-            {otaStatus === 'updated' && <span className="sr-only" role="status">تم تنزيل التحديث وسيعاد تشغيل التطبيق</span>}
-            {otaStatus === 'error' && <span className="sr-only" role="status">تعذر تنزيل التحديث</span>}
+            {otaMessage && <span className={`absolute top-full left-2 mt-1 z-50 max-w-[220px] rounded-lg px-2 py-1 text-[10px] shadow-lg ${otaStatus === 'error' ? 'bg-red-600 text-white' : 'bg-gray-800 text-white'}`} role="status">{otaMessage}</span>}
             {/* Mobile search toggle */}
             <button onClick={() => setMobileSearchOpen(!mobileSearchOpen)} className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors" aria-label="بحث">
               <Search size={22} className="text-brand-800"/>

@@ -3,8 +3,6 @@ import { CapacitorUpdater } from '@capgo/capacitor-updater';
 
 const OTA_MANIFEST_URL =
   'https://github.com/ahn90073-pixel/online-store/releases/download/ota-latest/ota-manifest.json';
-const OTA_VERSION_KEY = 'online-store-ota-version';
-
 function isNewerVersion(nextVersion, currentVersion) {
   if (!currentVersion) return true;
   const next = String(nextVersion).split('.').map(Number);
@@ -35,24 +33,28 @@ async function readManifest() {
   return manifest;
 }
 
-export async function checkForOtaUpdate({ force = false } = {}) {
+export async function checkForOtaUpdate({ force = false, onStatus } = {}) {
   if (!Capacitor.isNativePlatform()) return { updated: false, skipped: true };
 
+  onStatus?.('الاتصال بـ GitHub...');
   const manifest = await readManifest();
-  const currentVersion = localStorage.getItem(OTA_VERSION_KEY);
+  onStatus?.(`تم العثور على OTA ${manifest.version}`);
+  const current = await CapacitorUpdater.current();
+  const currentVersion = current?.bundle?.version || '';
   if (!force && !isNewerVersion(manifest.version, currentVersion)) {
-    return { updated: false, version: currentVersion };
+    return { updated: false, version: currentVersion || 'النسخة المدمجة' };
   }
 
+  onStatus?.('جاري تنزيل حزمة OTA...');
   const downloaded = await CapacitorUpdater.download({
     version: manifest.version,
     url: manifest.bundleUrl,
     checksum: manifest.sha256,
   });
 
-  localStorage.setItem(OTA_VERSION_KEY, manifest.version);
-  // Apply immediately for the OTA verification flow; the app reloads safely.
-  await CapacitorUpdater.set({ id: downloaded.id });
+  onStatus?.('تم التنزيل، جاري تفعيل التحديث...');
+  // Capgo treats set() as terminal: it activates the bundle and reloads the app.
+  await CapacitorUpdater.set(downloaded);
   return { updated: true, version: manifest.version };
 }
 
@@ -64,7 +66,7 @@ export function startOtaChecks() {
     if (checking) return;
     checking = true;
     try {
-      await checkForOtaUpdate();
+      await checkForOtaUpdate({ onStatus: (message) => console.info(`[OTA] ${message}`) });
     } catch (error) {
       // OTA must never block the storefront; the built-in bundle remains available.
       console.warn('[OTA] Update skipped:', error);

@@ -36,7 +36,9 @@ jobs:
           zip -qr ../ota/web-bundle.zip .
           cd ..
           HASH=$(sha256sum ota/web-bundle.zip | awk '{print $1}')
-          VERSION="0.0.${RUN_NUMBER}"
+          # Keep OTA versions above the native 1.2.x baseline. The old 0.0.x
+          # values were treated as older than the APK and skipped by the client.
+          VERSION="1.2.${RUN_NUMBER}"
           BUNDLE_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/ota-latest/web-bundle.zip"
           cat > ota/ota-manifest.json <<EOF
           {

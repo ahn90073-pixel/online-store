@@ -73,7 +73,7 @@ function Storefront() {
       <Toast message={toast.message} show={toast.show}/>
       <TopBar />
       <Header onCategoryMenuClick={() => setCategoryDrawerOpen(true)} onCartClick={() => setCartDrawerOpen(true)} onSearch={handleSearch}/>
-      <CategoriesBar onMenuClick={() => setCategoryDrawerOpen(true)} onCategorySelect={handleCategorySelect} drawerOpen={categoryDrawerOpen} onDrawerClose={() => setCategoryDrawerOpen(false)}/>
+      <CategoriesBar showBar={false} onMenuClick={() => setCategoryDrawerOpen(true)} onCategorySelect={handleCategorySelect} drawerOpen={categoryDrawerOpen} onDrawerClose={() => setCategoryDrawerOpen(false)}/>
 
       <main className="pb-8">
         {!isFiltered && <HeroSection />}

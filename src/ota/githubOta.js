@@ -50,8 +50,9 @@ export async function checkForOtaUpdate() {
     checksum: manifest.sha256,
   });
 
-  await CapacitorUpdater.next({ id: downloaded.id });
   localStorage.setItem(OTA_VERSION_KEY, manifest.version);
+  // Apply immediately for the OTA verification flow; the app reloads safely.
+  await CapacitorUpdater.set({ id: downloaded.id });
   return { updated: true, version: manifest.version };
 }
 

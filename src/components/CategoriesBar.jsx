@@ -12,10 +12,10 @@ const iconMap = {
     Camera,
     Watch,
 };
-export default function CategoriesBar({ onMenuClick, onCategorySelect, drawerOpen, onDrawerClose }) {
+export default function CategoriesBar({ onMenuClick, onCategorySelect, drawerOpen, onDrawerClose, showBar = true }) {
     const [expandedCategory, setExpandedCategory] = useState(null);
     return (<>
-      <div className="bg-white border-b border-gray-200 sticky top-16 md:top-20 z-30 shadow-sm">
+      {showBar && <div className="bg-white border-b border-gray-200 sticky top-16 md:top-20 z-30 shadow-sm">
         <div className="max-w-[1400px] mx-auto px-3 md:px-6">
           <div className="flex items-center gap-2 h-12">
             {/* All categories button */}
@@ -42,7 +42,7 @@ export default function CategoriesBar({ onMenuClick, onCategorySelect, drawerOpe
             </button>
           </div>
         </div>
-      </div>
+      </div>}
 
       {/* Category Drawer */}
       <AnimatePresence>

@@ -44,13 +44,12 @@ export default function Header({ onCategoryMenuClick, onCartClick, onSearch }) {
           </button>
 
           {/* Logo */}
-          <a href="#" className="flex items-center gap-1.5 flex-shrink-0" aria-label="سوق اون لين - OTA TEST">
+          <a href="#" className="flex items-center flex-shrink-0" aria-label="سوق اون لين">
             <img
               src={storeIcon}
               alt="سوق اون لين"
-              className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 object-contain rounded-lg ring-2 ring-brand-600 ring-offset-1"
+              className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 object-contain rounded-lg"
             />
-            <span className="text-[9px] sm:text-[10px] font-bold text-brand-700 whitespace-nowrap">OTA TEST</span>
           </a>
 
           {/* Search bar - desktop */}
@@ -80,9 +79,9 @@ export default function Header({ onCategoryMenuClick, onCartClick, onSearch }) {
           {/* Right actions */}
           <div className="flex items-center gap-1 md:gap-3 mr-auto md:mr-0">
             {/* Manual OTA update */}
-            <button onClick={handleOtaUpdate} disabled={otaStatus === 'checking'} className="flex items-center gap-1 px-2 py-2 text-[11px] sm:text-xs font-bold text-brand-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors disabled:opacity-60" aria-label="فحص تحديث جديد">
+            <button onClick={handleOtaUpdate} disabled={otaStatus === 'checking'} className="flex items-center gap-1 px-2 py-2 text-xs sm:text-sm font-bold text-brand-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors disabled:opacity-60" aria-label="فحص تحديث جديد" title="فحص تحديث جديد">
               <RefreshCw size={16} className={otaStatus === 'checking' ? 'animate-spin' : ''}/>
-              <span>{otaStatus === 'checking' ? 'جاري الفحص' : 'تحديث جديد'}</span>
+              <span className="hidden sm:inline">{otaStatus === 'checking' ? 'جاري الفحص' : 'تحديث'}</span>
             </button>
             {otaStatus === 'none' && <span className="sr-only" role="status">لا يوجد تحديث جديد</span>}
             {otaStatus === 'updated' && <span className="sr-only" role="status">تم تنزيل التحديث وسيعاد تشغيل التطبيق</span>}

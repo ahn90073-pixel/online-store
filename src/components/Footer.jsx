@@ -1,4 +1,5 @@
 import { Mail, Facebook, Instagram, Twitter, MapPin, Phone, CreditCard } from 'lucide-react';
+import storeIcon from '../../asset/store-icon-1024.png';
 const footerLinks = [
     {
         title: 'عن المتجر',
@@ -48,7 +49,7 @@ export default function Footer() {
           <div className="col-span-2 lg:col-span-2">
             <div className="mb-4">
               <img
-                src="/asset/store-icon-1024.png"
+                src={storeIcon}
                 alt="سوق اون لين"
                 className="w-20 h-20 md:w-24 md:h-24 object-contain object-right rounded-lg"
               />

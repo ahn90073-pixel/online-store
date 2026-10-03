@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Search, ShoppingCart, User, Menu, ChevronDown, Heart, Package, X } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { categories } from '@/data/storeData';
+import storeIcon from '../../asset/store-icon-1024.png';
 export default function Header({ onCategoryMenuClick, onCartClick, onSearch }) {
     const { cartCount } = useCart();
     const [searchQuery, setSearchQuery] = useState('');
@@ -32,7 +33,7 @@ export default function Header({ onCategoryMenuClick, onCartClick, onSearch }) {
           {/* Logo */}
           <a href="#" className="flex items-center flex-shrink-0" aria-label="سوق اون لين">
             <img
-              src="/asset/store-icon-1024.png"
+              src={storeIcon}
               alt="سوق اون لين"
               className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 object-contain rounded-lg"
             />

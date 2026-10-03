@@ -66,12 +66,12 @@ export default function HeroSection() {
         <div className="grid grid-cols-3 lg:grid-cols-1 gap-3">
           {promoCards.map((promo) => {
             const Icon = iconMap[promo.icon] || Truck;
-            return (<div key={promo.id} className={`${promo.bgColor} rounded-xl p-3 md:p-4 text-white flex items-center gap-3 hover:scale-[1.02] transition-transform cursor-pointer`}>
-                <div className="w-10 h-10 md:w-12 md:h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Icon size={22} className="text-white"/>
+            return (<div key={promo.id} className={`${promo.bgColor} rounded-xl p-2 md:p-4 text-white flex flex-col lg:flex-row items-center lg:items-start justify-center gap-2 md:gap-3 min-h-[132px] lg:min-h-0 text-center lg:text-right hover:scale-[1.02] transition-transform cursor-pointer`}>
+                <div className="w-9 h-9 md:w-12 md:h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Icon size={20} className="text-white" strokeWidth={2.5}/>
                 </div>
-                <div>
-                  <div className="font-bold text-xs md:text-sm leading-tight">{promo.title}</div>
+                <div className="min-w-0 w-full">
+                  <div className="font-bold text-[11px] sm:text-xs md:text-sm leading-snug break-words text-white">{promo.title}</div>
                   <div className="text-[10px] md:text-xs text-white/80 hidden sm:block">{promo.description}</div>
                 </div>
               </div>);

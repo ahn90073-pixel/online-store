@@ -60,8 +60,17 @@ jobs:
           test -n "$ANDROID_KEY_PASSWORD"
           keytool -list -keystore "$ANDROID_KEYSTORE_PATH" \
             -storepass "$ANDROID_KEYSTORE_PASSWORD" \
-            -alias "$ANDROID_KEY_ALIAS" \
-            -keypass "$ANDROID_KEY_PASSWORD" >/dev/null
+            -alias "$ANDROID_KEY_ALIAS" >/dev/null
+          keytool -importkeystore \
+            -srckeystore "$ANDROID_KEYSTORE_PATH" \
+            -srcstoretype JKS \
+            -srcstorepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -srcalias "$ANDROID_KEY_ALIAS" \
+            -srckeypass "$ANDROID_KEY_PASSWORD" \
+            -destkeystore "$RUNNER_TEMP/signing-check.p12" \
+            -deststoretype PKCS12 \
+            -deststorepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -noprompt >/dev/null 2>&1
 
       - name: Build signed APK and AAB
         working-directory: android

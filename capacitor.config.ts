@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.ahn90073.onlinestore',
-  appName: 'Online Store',
+  appName: 'سوق اون لين',
   webDir: 'dist'
 };
 

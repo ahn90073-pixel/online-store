@@ -48,15 +48,15 @@ export default function Footer() {
           <div className="col-span-2 lg:col-span-2">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-11 h-11 bg-gradient-to-br from-brand-600 to-brand-800 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">N</span>
+                <span className="text-white font-bold text-lg">س</span>
               </div>
               <div>
-                <div className="font-bold text-lg text-white">النخبة</div>
+                <div className="font-bold text-lg text-white">سوق اون لين</div>
                 <div className="text-[10px] text-gray-400">متجر إلكتروني</div>
               </div>
             </div>
             <p className="text-sm text-gray-400 leading-relaxed mb-4 max-w-sm">
-              متجر النخبة هو وجهتك الأولى للتسوق الإلكتروني في مصر. آلاف المنتجات الأصلية بأفضل الأسعار مع شحن سريع لجميع المحافظات ودفع عند الاستلام.
+              سوق اون لين هو وجهتك الأولى للتسوق الإلكتروني في مصر. آلاف المنتجات الأصلية بأفضل الأسعار مع شحن سريع لجميع المحافظات ودفع عند الاستلام.
             </p>
             <div className="flex items-center gap-3">
               <a href="#" className="w-9 h-9 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-colors" aria-label="فيسبوك">
@@ -88,7 +88,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 pt-6 border-t border-white/10">
           <div className="flex items-center gap-2 text-sm">
             <MapPin size={18} className="text-accent-400"/>
-            <span>القاهرة، مصر - شارع التحرير، مبنى النخبة التجاري</span>
+            <span>القاهرة، مصر - شارع التحرير، مبنى سوق اون لين التجاري</span>
           </div>
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-2">
@@ -124,7 +124,7 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="max-w-[1400px] mx-auto px-3 md:px-6 py-4 text-center">
           <p className="text-xs text-gray-500">
-            © 2026 متجر النخبة. جميع الحقوق محفوظة. — صُمم بكل حب في مصر
+            © 2026 سوق اون لين. جميع الحقوق محفوظة. — صُمم بكل حب في مصر
           </p>
         </div>
       </div>

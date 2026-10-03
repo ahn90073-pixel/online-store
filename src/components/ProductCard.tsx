@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Heart, ShoppingCart, Zap, BadgeCheck, Truck } from 'lucide-react';
 import type { Product } from '@/data/storeData';
 import StarRating from './StarRating';
-import { motion } from 'framer-motion';
 
 interface ProductCardProps {
   product: Product;
@@ -13,8 +12,6 @@ interface ProductCardProps {
 export default function ProductCard({ product, onAddToCart, compact }: ProductCardProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [heartAnim, setHeartAnim] = useState(false);
-
-  const discountPercent = Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100);
 
   const handleFavorite = () => {
     setIsFavorite(!isFavorite);

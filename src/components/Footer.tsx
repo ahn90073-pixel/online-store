@@ -1,4 +1,4 @@
-import { ShoppingCart, Mail, Facebook, Instagram, Twitter, MapPin, Phone, CreditCard } from 'lucide-react';
+import { Mail, Facebook, Instagram, Twitter, MapPin, Phone, CreditCard } from 'lucide-react';
 
 const footerLinks = [
   {

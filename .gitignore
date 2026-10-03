@@ -21,3 +21,11 @@ dist-ssr
 *.sln
 *.sw?
 .env
+*.env
+!.env.example
+*.jks
+*.keystore
+*.p12
+*.mobileprovision
+*.p8
+*.base64

@@ -35,12 +35,12 @@ async function readManifest() {
   return manifest;
 }
 
-export async function checkForOtaUpdate() {
+export async function checkForOtaUpdate({ force = false } = {}) {
   if (!Capacitor.isNativePlatform()) return { updated: false, skipped: true };
 
   const manifest = await readManifest();
   const currentVersion = localStorage.getItem(OTA_VERSION_KEY);
-  if (!isNewerVersion(manifest.version, currentVersion)) {
+  if (!force && !isNewerVersion(manifest.version, currentVersion)) {
     return { updated: false, version: currentVersion };
   }
 

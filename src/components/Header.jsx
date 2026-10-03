@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search, ShoppingCart, User, Menu, ChevronDown, Heart, Package, X } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, ChevronDown, Heart, Package, X, RefreshCw } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { categories } from '@/data/storeData';
+import { checkForOtaUpdate } from '@/ota/githubOta';
 import storeIcon from '../../asset/store-icon-1024.png';
 export default function Header({ onCategoryMenuClick, onCartClick, onSearch }) {
     const { cartCount } = useCart();
@@ -9,6 +10,7 @@ export default function Header({ onCategoryMenuClick, onCartClick, onSearch }) {
     const [selectedCategory, setSelectedCategory] = useState('جميع الأقسام');
     const [catDropdownOpen, setCatDropdownOpen] = useState(false);
     const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+    const [otaStatus, setOtaStatus] = useState('idle');
     const catRef = useRef(null);
     useEffect(() => {
         function handleClickOutside(e) {
@@ -21,6 +23,17 @@ export default function Header({ onCategoryMenuClick, onCartClick, onSearch }) {
     }, []);
     const handleSearch = () => {
         onSearch(searchQuery);
+    };
+    const handleOtaUpdate = async () => {
+        if (otaStatus === 'checking') return;
+        setOtaStatus('checking');
+        try {
+            const result = await checkForOtaUpdate({ force: true });
+            setOtaStatus(result.skipped ? 'native-only' : result.updated ? 'updated' : 'none');
+        } catch (error) {
+            console.warn('[OTA] Manual update failed:', error);
+            setOtaStatus('error');
+        }
     };
     return (<header className="bg-white shadow-md sticky top-0 z-40">
       <div className="max-w-[1400px] mx-auto px-3 md:px-6">
@@ -66,6 +79,14 @@ export default function Header({ onCategoryMenuClick, onCartClick, onSearch }) {
 
           {/* Right actions */}
           <div className="flex items-center gap-1 md:gap-3 mr-auto md:mr-0">
+            {/* Manual OTA update */}
+            <button onClick={handleOtaUpdate} disabled={otaStatus === 'checking'} className="flex items-center gap-1 px-2 py-2 text-[11px] sm:text-xs font-bold text-brand-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors disabled:opacity-60" aria-label="فحص تحديث جديد">
+              <RefreshCw size={16} className={otaStatus === 'checking' ? 'animate-spin' : ''}/>
+              <span>{otaStatus === 'checking' ? 'جاري الفحص' : 'تحديث جديد'}</span>
+            </button>
+            {otaStatus === 'none' && <span className="sr-only" role="status">لا يوجد تحديث جديد</span>}
+            {otaStatus === 'updated' && <span className="sr-only" role="status">تم تنزيل التحديث وسيعاد تشغيل التطبيق</span>}
+            {otaStatus === 'error' && <span className="sr-only" role="status">تعذر تنزيل التحديث</span>}
             {/* Mobile search toggle */}
             <button onClick={() => setMobileSearchOpen(!mobileSearchOpen)} className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors" aria-label="بحث">
               <Search size={22} className="text-brand-800"/>

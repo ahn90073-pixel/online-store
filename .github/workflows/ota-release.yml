@@ -1,0 +1,72 @@
+name: Publish OTA Web Bundle
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish-ota:
+    name: Build and publish OTA bundle
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Build web bundle
+        run: npm ci && npm run build
+
+      - name: Package bundle and create manifest
+        env:
+          RUN_NUMBER: ${{ github.run_number }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p ota
+          cd dist
+          zip -qr ../ota/web-bundle.zip .
+          cd ..
+          HASH=$(sha256sum ota/web-bundle.zip | awk '{print $1}')
+          VERSION="0.0.${RUN_NUMBER}"
+          BUNDLE_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/ota-latest/web-bundle.zip"
+          cat > ota/ota-manifest.json <<EOF
+          {
+            "appId": "com.ahn90073.onlinestore",
+            "version": "${VERSION}",
+            "channel": "production",
+            "bundleUrl": "${BUNDLE_URL}",
+            "sha256": "${HASH}",
+            "commit": "${SHA}",
+            "minimumNativeVersion": "1.1.0"
+          }
+          EOF
+          printf '%s  %s\n' "$HASH" web-bundle.zip > ota/SHA256SUMS.txt
+          cat ota/ota-manifest.json
+
+      - name: Create or update OTA release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if ! gh release view ota-latest --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create ota-latest \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "OTA latest" \
+              --notes "Automatically published web bundle for سوق اون لين" \
+              --prerelease
+          fi
+          gh release upload ota-latest \
+            ota/web-bundle.zip \
+            ota/ota-manifest.json \
+            ota/SHA256SUMS.txt \
+            --repo "$GITHUB_REPOSITORY" \
+            --clobber

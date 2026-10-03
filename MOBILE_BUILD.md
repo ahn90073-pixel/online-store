@@ -31,6 +31,28 @@ npx cap open ios
 - `Mobile CI`: يعمل تلقائيًا عند push/PR، ويتحقق من React/TypeScript وينتج APK debug.
 - `Android Release`: تشغيل يدوي من Actions وينتج APK وAAB موقّعين.
 - `iOS Release`: تشغيل يدوي على macOS وينتج IPA موقّع.
+- `Publish OTA Web Bundle`: يعمل تلقائيًا بعد كل push إلى `main`، ويبني `dist` ويرفعه إلى إصدار GitHub باسم `ota-latest`.
+
+## التحديث الهوائي OTA
+
+يستخدم المشروع `@capgo/capacitor-updater` مع GitHub Releases كمخزن حزم. عميل OTA موجود في
+`src/ota/githubOta.js`، ويقرأ `ota-manifest.json` من إصدار `ota-latest`، ثم ينزّل الحزمة
+ويتحقق من SHA-256 ويضعها للتفعيل عند انتقال التطبيق للخلفية أو إعادة فتحه. إذا فشلت
+الحزمة، يعيد Capacitor تلقائيًا آخر نسخة سليمة أو النسخة المضمنة داخل التطبيق.
+
+**مهم:** الإصدار القديم `v1.0.0` لا يحتوي على عميل OTA. يجب أولًا نشر نسخة Native جديدة
+مثل `v1.1.0` من Android وiOS، وبعد تثبيتها يمكن لتعديلات React/JSX/CSS اللاحقة الوصول
+للمستخدمين عبر GitHub دون APK/IPA جديد. تغييرات Kotlin/Swift والصلاحيات والإضافات الأصلية
+ما زالت تحتاج إصدارًا جديدًا من المتجر.
+
+### اختبار OTA
+
+1. شغّل `Android Release` باستخدام `v1.1.0`، وثبّت APK على جهاز اختبار. بالنسبة لـiOS استخدم TestFlight.
+2. بعد ذلك عدّل واجهة React وادفع التعديل إلى `main`.
+3. انتظر نجاح `Publish OTA Web Bundle`.
+4. افتح التطبيق ثم أرسله للخلفية وأعد فتحه؛ سيُفعّل الحزمة الجديدة بأمان.
+
+لا تغيّر اسم إصدار `ota-latest` ولا تحذف ملفات `web-bundle.zip` و`ota-manifest.json` من ذلك الإصدار.
 
 ## أسرار Android المطلوبة في GitHub
 

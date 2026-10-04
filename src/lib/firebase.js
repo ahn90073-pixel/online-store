@@ -59,7 +59,7 @@ export async function saveDeviceToken(token, platform) {
 
 export async function loadCart() {
   const user = await ensureFirebaseUser();
-  const snapshot = await getDoc(doc(db, 'users', user.uid, 'cart', 'current'));
+  const snapshot = await getDoc(doc(db, 'carts', user.uid));
   return snapshot.exists() && Array.isArray(snapshot.data().items) ? snapshot.data().items : [];
 }
 
@@ -68,7 +68,7 @@ export async function saveCart(items) {
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
       const user = await ensureFirebaseUser();
-      await setDoc(doc(db, 'users', user.uid, 'cart', 'current'), {
+      await setDoc(doc(db, 'carts', user.uid), {
         items,
         updatedAt: serverTimestamp(),
       }, { merge: true });

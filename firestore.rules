@@ -14,7 +14,7 @@ service cloud.firestore {
       allow read, write: if ownsUser(userId);
     }
 
-    match /users/{userId}/cart/current {
+    match /carts/{userId} {
       allow read, write: if ownsUser(userId);
     }
 

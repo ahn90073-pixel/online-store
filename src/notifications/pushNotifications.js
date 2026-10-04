@@ -1,23 +1,6 @@
-import { Capacitor, CapacitorHttp } from '@capacitor/core';
+import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
-
-const REGISTER_TOKEN_URL =
-  'https://europe-west1-coffee-spark-ai-barista-c481f.cloudfunctions.net/registerDeviceToken';
-
-async function registerTokenWithFirebase(token) {
-  const response = await CapacitorHttp.post({
-    url: REGISTER_TOKEN_URL,
-    headers: { 'Content-Type': 'application/json' },
-    data: {
-      token,
-      platform: Capacitor.getPlatform(),
-    },
-  });
-  if (response.status < 200 || response.status >= 300) {
-    throw new Error(`Firebase token registration returned ${response.status}`);
-  }
-  console.info('[Push] Token saved in Firebase Firestore');
-}
+import { saveDeviceToken } from '@/lib/firebase';
 
 /**
  * Initializes native push notifications.
@@ -57,7 +40,9 @@ export async function initializePushNotifications({ onToken, onNotification, onA
     // This is the FCM token on Android and the APNs/FCM token provided by iOS.
     console.info('[Push] Device token received:', token.value);
     onToken?.(token.value);
-    registerTokenWithFirebase(token.value).catch((error) => {
+    saveDeviceToken(token.value, Capacitor.getPlatform()).then(() => {
+      console.info('[Push] Token saved in Firebase Firestore');
+    }).catch((error) => {
       console.warn('[Push] Firebase token registration skipped:', error);
     });
   });

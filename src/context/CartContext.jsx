@@ -1,7 +1,33 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { loadCart, saveCart } from '@/lib/firebase';
+
 const CartContext = createContext(undefined);
+
 export function CartProvider({ children }) {
     const [cartItems, setCartItems] = useState([]);
+    const [cartLoaded, setCartLoaded] = useState(false);
+
+    useEffect(() => {
+        let active = true;
+        loadCart()
+            .then((items) => {
+                if (active) setCartItems(items);
+            })
+            .catch((error) => console.warn('[Firebase] Could not load cart:', error))
+            .finally(() => {
+                if (active) setCartLoaded(true);
+            });
+        return () => { active = false; };
+    }, []);
+
+    useEffect(() => {
+        if (!cartLoaded) return undefined;
+        const timer = setTimeout(() => {
+            saveCart(cartItems).catch((error) => console.warn('[Firebase] Could not save cart:', error));
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [cartItems, cartLoaded]);
+
     const addToCart = useCallback((item) => {
         setCartItems((prev) => {
             const existing = prev.find((i) => i.id === item.id);

@@ -23,6 +23,9 @@ export function ensureFirebaseUser() {
     anonymousUserPromise = auth.currentUser
       ? Promise.resolve(auth.currentUser)
       : signInAnonymously(auth).then(({ user }) => user);
+    anonymousUserPromise.catch(() => {
+      anonymousUserPromise = undefined;
+    });
   }
   return anonymousUserPromise;
 }
@@ -34,14 +37,24 @@ async function hashToken(token) {
 }
 
 export async function saveDeviceToken(token, platform) {
-  const user = await ensureFirebaseUser();
-  const tokenId = await hashToken(token);
-  await setDoc(doc(db, 'users', user.uid, 'device_tokens', tokenId), {
-    token,
-    platform,
-    enabled: true,
-    updatedAt: serverTimestamp(),
-  }, { merge: true });
+  let lastError;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const user = await ensureFirebaseUser();
+      const tokenId = await hashToken(token);
+      await setDoc(doc(db, 'users', user.uid, 'device_tokens', tokenId), {
+        token,
+        platform,
+        enabled: true,
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
+      return;
+    } catch (error) {
+      lastError = error;
+      await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+    }
+  }
+  throw lastError;
 }
 
 export async function loadCart() {
@@ -51,9 +64,19 @@ export async function loadCart() {
 }
 
 export async function saveCart(items) {
-  const user = await ensureFirebaseUser();
-  await setDoc(doc(db, 'users', user.uid, 'cart', 'current'), {
-    items,
-    updatedAt: serverTimestamp(),
-  }, { merge: true });
+  let lastError;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const user = await ensureFirebaseUser();
+      await setDoc(doc(db, 'users', user.uid, 'cart', 'current'), {
+        items,
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
+      return;
+    } catch (error) {
+      lastError = error;
+      await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+    }
+  }
+  throw lastError;
 }

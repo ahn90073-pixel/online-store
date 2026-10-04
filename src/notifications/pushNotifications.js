@@ -1,0 +1,60 @@
+import { Capacitor } from '@capacitor/core';
+import { PushNotifications } from '@capacitor/push-notifications';
+
+/**
+ * Initializes native push notifications.
+ * The token is logged for testing and can later be sent to the backend.
+ */
+export async function initializePushNotifications({ onToken, onNotification, onAction } = {}) {
+  if (!Capacitor.isNativePlatform()) {
+    return { enabled: false, reason: 'web' };
+  }
+
+  const permission = await PushNotifications.checkPermissions();
+  let receive = permission.receive;
+
+  if (receive !== 'granted') {
+    const requested = await PushNotifications.requestPermissions();
+    receive = requested.receive;
+  }
+
+  if (receive !== 'granted') {
+    console.warn('[Push] Notification permission was not granted:', receive);
+    return { enabled: false, reason: 'permission-denied' };
+  }
+
+  if (Capacitor.getPlatform() === 'android') {
+    await PushNotifications.createChannel({
+      id: 'store-default',
+      name: 'إشعارات المتجر',
+      description: 'تنبيهات الطلبات والعروض الجديدة',
+      importance: 5,
+      visibility: 1,
+      sound: 'default',
+      vibration: true,
+    });
+  }
+
+  await PushNotifications.addListener('registration', (token) => {
+    // This is the FCM token on Android and the APNs/FCM token provided by iOS.
+    console.info('[Push] Device token received:', token.value);
+    onToken?.(token.value);
+  });
+
+  await PushNotifications.addListener('registrationError', (error) => {
+    console.error('[Push] Registration failed:', error);
+  });
+
+  await PushNotifications.addListener('pushNotificationReceived', (notification) => {
+    console.info('[Push] Notification received:', notification);
+    onNotification?.(notification);
+  });
+
+  await PushNotifications.addListener('pushNotificationActionPerformed', (event) => {
+    console.info('[Push] Notification opened:', event);
+    onAction?.(event);
+  });
+
+  await PushNotifications.register();
+  return { enabled: true, permission: receive };
+}

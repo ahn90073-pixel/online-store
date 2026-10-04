@@ -20,7 +20,7 @@ jobs:
           set -euo pipefail
           test -n "$IOS_GOOGLE_SERVICE_INFO_BASE64"
           mkdir -p ios/App/App
-          python3 -c 'import base64,sys; sys.stdout.buffer.write(base64.b64decode(sys.stdin.read()))' \
+          python3 -c 'import base64,sys; s="".join(sys.stdin.read().split()); s += "=" * (-len(s) % 4); sys.stdout.buffer.write(base64.b64decode(s))' \
             <<< "$IOS_GOOGLE_SERVICE_INFO_BASE64" > ios/App/App/GoogleService-Info.plist
           test -s ios/App/App/GoogleService-Info.plist
           plutil -lint ios/App/App/GoogleService-Info.plist

@@ -29,8 +29,18 @@ jobs:
         run: |
           set -euo pipefail
           test -n "$ANDROID_GOOGLE_SERVICES_BASE64"
-          python3 -c 'import base64,sys; s="".join(sys.stdin.read().split()); s += "=" * (-len(s) % 4); sys.stdout.buffer.write(base64.b64decode(s))' \
-            <<< "$ANDROID_GOOGLE_SERVICES_BASE64" > android/app/google-services.json
+          python3 - <<'PY'
+          import base64, json, os
+          raw = os.environ['ANDROID_GOOGLE_SERVICES_BASE64']
+          if raw.lstrip().startswith('{'):
+              data = raw.encode()
+          else:
+              value = ''.join(raw.split())
+              value += '=' * (-len(value) % 4)
+              data = base64.b64decode(value, validate=True)
+          json.loads(data.decode('utf-8'))
+          open('android/app/google-services.json', 'wb').write(data)
+          PY
           test -s android/app/google-services.json
           python3 -m json.tool android/app/google-services.json >/dev/null
 

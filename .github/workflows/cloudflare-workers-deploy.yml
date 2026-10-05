@@ -30,9 +30,11 @@ jobs:
       - name: Deploy Worker
         uses: cloudflare/wrangler-action@v3
         env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          wranglerVersion: '4.147.0'
           secrets: |
             DATABASE_URL
           command: deploy

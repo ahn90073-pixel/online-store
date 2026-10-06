@@ -74,10 +74,10 @@ function Storefront() {
       <Toast message={toast.message} show={toast.show}/>
       <TopBar />
       <Header onCategoryMenuClick={() => setCategoryDrawerOpen(true)} onCartClick={() => setCartDrawerOpen(true)} onSearch={handleSearch}/>
-      <NotificationTokenCard />
-      <CategoriesBar showBar={false} onMenuClick={() => setCategoryDrawerOpen(true)} onCategorySelect={handleCategorySelect} drawerOpen={categoryDrawerOpen} onDrawerClose={() => setCategoryDrawerOpen(false)}/>
+      <CategoriesBar showBar={true} onMenuClick={() => setCategoryDrawerOpen(true)} onCategorySelect={handleCategorySelect} drawerOpen={categoryDrawerOpen} onDrawerClose={() => setCategoryDrawerOpen(false)}/>
 
       <main className="pb-8">
+        <NotificationTokenCard />
         {!isFiltered && <HeroSection />}
         {!isFiltered && <FlashDeals onAddToCart={handleAddToCart}/>}
         {!isFiltered && (<ProductGrid title="منتجات مختارة لك" subtitle="اكتشف أفضل المنتجات المختارة بعناية لك" products={recommendedProducts} onAddToCart={handleAddToCart} showSeeAll/>)}

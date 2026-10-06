@@ -60,6 +60,7 @@ npx cap open ios
 
 | الاسم | القيمة |
 |---|---|
+| `GOOGLE_SERVICES_JSON_BASE64` | محتوى `google-services.json` بعد تحويله إلى Base64؛ مطلوب لتفعيل Firebase Cloud Messaging |
 | `ANDROID_KEYSTORE_BASE64` | محتوى keystore بعد تحويله إلى Base64 |
 | `ANDROID_KEYSTORE_PASSWORD` | كلمة مرور keystore |
 | `ANDROID_KEY_ALIAS` | اسم المفتاح داخل keystore |

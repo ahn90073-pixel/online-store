@@ -25,13 +25,13 @@ jobs:
 
       - name: Restore Firebase Android config
         env:
-          ANDROID_GOOGLE_SERVICES_BASE64: ${{ secrets.ANDROID_GOOGLE_SERVICES_BASE64 }}
+          GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
         run: |
           set -euo pipefail
-          test -n "$ANDROID_GOOGLE_SERVICES_BASE64"
+          test -n "$GOOGLE_SERVICES_JSON_BASE64"
           python3 - <<'PY'
           import base64, json, os
-          raw = os.environ['ANDROID_GOOGLE_SERVICES_BASE64']
+          raw = os.environ['GOOGLE_SERVICES_JSON_BASE64']
           if raw.lstrip().startswith('{'):
               data = raw.encode()
           else:
@@ -43,6 +43,29 @@ jobs:
           PY
           test -s android/app/google-services.json
           python3 -m json.tool android/app/google-services.json >/dev/null
+      - name: Export Firebase Web config for the build
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os
+          data = json.load(open('android/app/google-services.json', encoding='utf-8'))
+          project = data['project_info']
+          client = data['client'][0]
+          app_id = client['client_info']['mobilesdk_app_id']
+          api_key = client['api_key'][0]['current_key']
+          values = {
+              'VITE_FIREBASE_API_KEY': api_key,
+              'VITE_FIREBASE_AUTH_DOMAIN': f"{project['project_id']}.firebaseapp.com",
+              'VITE_FIREBASE_DATABASE_URL': f"https://{project['project_id']}-default-rtdb.firebaseio.com",
+              'VITE_FIREBASE_PROJECT_ID': project['project_id'],
+              'VITE_FIREBASE_STORAGE_BUCKET': project.get('storage_bucket', ''),
+              'VITE_FIREBASE_MESSAGING_SENDER_ID': project['project_number'],
+              'VITE_FIREBASE_APP_ID': app_id,
+          }
+          with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as env:
+              for key, value in values.items():
+                  env.write(f'{key}<<__FIREBASE_EOF__\n{value}\n__FIREBASE_EOF__\n')
+          PY
 
       - name: Setup Node
         uses: actions/setup-node@v4

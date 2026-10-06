@@ -2,6 +2,17 @@ import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { saveDeviceToken } from '@/lib/firebase';
 
+const FCM_TOKEN_STORAGE_KEY = 'online-store-fcm-token';
+
+function publishToken(token) {
+  try {
+    localStorage.setItem(FCM_TOKEN_STORAGE_KEY, token);
+  } catch {
+    // Token display should not block notification registration.
+  }
+  window.dispatchEvent(new CustomEvent('fcm-token-updated', { detail: token }));
+}
+
 /**
  * Initializes native push notifications.
  * The token is logged for testing and can later be sent to the backend.
@@ -39,6 +50,7 @@ export async function initializePushNotifications({ onToken, onNotification, onA
   await PushNotifications.addListener('registration', (token) => {
     // This is the FCM token on Android and the APNs/FCM token provided by iOS.
     console.info('[Push] Device token received:', token.value);
+    publishToken(token.value);
     onToken?.(token.value);
     saveDeviceToken(token.value, Capacitor.getPlatform()).then(() => {
       console.info('[Push] Token saved in Firebase Firestore');

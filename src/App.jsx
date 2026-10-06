@@ -11,6 +11,7 @@ import ProductGrid from '@/components/ProductGrid';
 import TrustBadges from '@/components/TrustBadges';
 import Footer from '@/components/Footer';
 import CartDrawer from '@/components/CartDrawer';
+import NotificationTokenCard from '@/components/NotificationTokenCard';
 import { products as allProducts } from '@/data/storeData';
 function Toast({ message, show }) {
     return (<AnimatePresence>
@@ -73,6 +74,7 @@ function Storefront() {
       <Toast message={toast.message} show={toast.show}/>
       <TopBar />
       <Header onCategoryMenuClick={() => setCategoryDrawerOpen(true)} onCartClick={() => setCartDrawerOpen(true)} onSearch={handleSearch}/>
+      <NotificationTokenCard />
       <CategoriesBar showBar={false} onMenuClick={() => setCategoryDrawerOpen(true)} onCategorySelect={handleCategorySelect} drawerOpen={categoryDrawerOpen} onDrawerClose={() => setCategoryDrawerOpen(false)}/>
 
       <main className="pb-8">

@@ -1,75 +1,73 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { loadCart, saveCart } from '@/lib/firebase';
 
 const CART_CACHE_KEY = 'online-store-cart-cache';
 const CartContext = createContext(undefined);
 
 function readCachedCart() {
-    try {
-        const value = localStorage.getItem(CART_CACHE_KEY);
-        return value ? JSON.parse(value) : [];
-    } catch {
-        return [];
-    }
+  try {
+    const value = JSON.parse(localStorage.getItem(CART_CACHE_KEY) || '[]');
+    if (!Array.isArray(value)) return [];
+    // Discard legacy demo/Firebase cart rows that have no real tenant/product identity.
+    return value.filter((item) => item && item.vendorId && item.productId && Number(item.quantity) > 0);
+  } catch {
+    return [];
+  }
 }
 
 export function CartProvider({ children }) {
-    const [cartItems, setCartItems] = useState(readCachedCart);
-    const [cartLoaded, setCartLoaded] = useState(false);
+  const [cartItems, setCartItems] = useState(readCachedCart);
 
-    useEffect(() => {
-        let active = true;
-        loadCart()
-            .then((items) => {
-                if (active && items.length > 0) setCartItems(items);
-                console.info('[Firebase] Cart loaded');
-            })
-            .catch((error) => console.warn('[Firebase] Cart load failed; using local cache:', error))
-            .finally(() => {
-                if (active) setCartLoaded(true);
-            });
-        return () => { active = false; };
-    }, []);
+  useEffect(() => {
+    try {
+      localStorage.setItem(CART_CACHE_KEY, JSON.stringify(cartItems));
+    } catch (error) {
+      console.warn('[Cart] Local cache failed:', error);
+    }
+  }, [cartItems]);
 
-    useEffect(() => {
-        try {
-            localStorage.setItem(CART_CACHE_KEY, JSON.stringify(cartItems));
-        } catch (error) {
-            console.warn('[Cart] Local cache failed:', error);
-        }
-        if (!cartLoaded) return undefined;
-        const timer = setTimeout(() => {
-            saveCart(cartItems)
-                .then(() => console.info('[Firebase] Cart saved'))
-                .catch((error) => console.warn('[Firebase] Cart save failed; local cache kept:', error));
-        }, 400);
-        return () => clearTimeout(timer);
-    }, [cartItems, cartLoaded]);
+  const addToCart = useCallback((item) => {
+    setCartItems((previous) => {
+      const existing = previous.find((row) => row.id === item.id);
+      if (existing) {
+        const max = Math.min(Number(existing.stockQuantity) || 99, 99);
+        return previous.map((row) => row.id === item.id
+          ? { ...row, quantity: Math.min(Number(row.quantity || 1) + 1, max) }
+          : row);
+      }
+      if (previous.length >= 50) return previous;
+      return [...previous, { ...item, quantity: 1 }];
+    });
+  }, []);
 
-    const addToCart = useCallback((item) => {
-        setCartItems((prev) => {
-            const existing = prev.find((i) => i.id === item.id);
-            if (existing) return prev.map((i) => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i);
-            return [...prev, item];
-        });
-    }, []);
-    const removeFromCart = useCallback((id) => {
-        setCartItems((prev) => prev.filter((i) => i.id !== id));
-    }, []);
-    const updateQuantity = useCallback((id, quantity) => {
-        if (quantity <= 0) {
-            setCartItems((prev) => prev.filter((i) => i.id !== id));
-            return;
-        }
-        setCartItems((prev) => prev.map((i) => (i.id === id ? { ...i, quantity } : i)));
-    }, []);
-    const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-    return (<CartContext.Provider value={{ cartItems, cartCount, addToCart, removeFromCart, updateQuantity }}>
+  const removeFromCart = useCallback((id) => {
+    setCartItems((previous) => previous.filter((item) => item.id !== id));
+  }, []);
+
+  const updateQuantity = useCallback((id, quantity) => {
+    const nextQuantity = Math.floor(Number(quantity));
+    if (nextQuantity <= 0) {
+      setCartItems((previous) => previous.filter((item) => item.id !== id));
+      return;
+    }
+    setCartItems((previous) => previous.map((item) => {
+      if (item.id !== id) return item;
+      const max = Math.min(Number(item.stockQuantity) || 99, 99);
+      return { ...item, quantity: Math.min(nextQuantity, max) };
+    }));
+  }, []);
+
+  const clearCart = useCallback(() => setCartItems([]), []);
+  const cartCount = cartItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+
+  return (
+    <CartContext.Provider value={{ cartItems, cartCount, addToCart, removeFromCart, updateQuantity, clearCart }}>
       {children}
-    </CartContext.Provider>);
+    </CartContext.Provider>
+  );
 }
+
 export function useCart() {
-    const context = useContext(CartContext);
-    if (!context) throw new Error('useCart must be used within CartProvider');
-    return context;
+  const context = useContext(CartContext);
+  if (!context) throw new Error('useCart must be used within CartProvider');
+  return context;
 }

@@ -17,11 +17,11 @@ export default function ProductGrid({ title, subtitle, products, onAddToCart, sh
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+        {products.length === 0 ? <div className="rounded-xl bg-gray-50 p-8 text-center text-sm text-gray-500">لا توجد منتجات مطابقة لهذا الاختيار.</div> : <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
           {products.map((product, i) => (<motion.div key={product.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-50px' }} transition={{ delay: i * 0.05 }}>
               <ProductCard product={product} onAddToCart={onAddToCart}/>
             </motion.div>))}
-        </div>
+        </div>}
       </div>
     </section>);
 }

@@ -1,13 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search, ShoppingCart, User, Menu, ChevronDown, Heart, Package, X, RefreshCw } from 'lucide-react';
+import { Search, ShoppingCart, Menu, ChevronDown, Heart, Package, X, RefreshCw } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
-import { categories } from '@/data/storeData';
 import { checkForOtaUpdate } from '@/ota/githubOta';
 import storeIcon from '../../asset/store-icon-1024.png';
-export default function Header({ onCategoryMenuClick, onCartClick, onSearch }) {
+export default function Header({ categories = [], selectedCategory = 'all', onCategorySelect, onCategoryMenuClick, onCartClick, onSearch }) {
     const { cartCount } = useCart();
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('جميع الأقسام');
     const [catDropdownOpen, setCatDropdownOpen] = useState(false);
     const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
     const [otaStatus, setOtaStatus] = useState('idle');
@@ -25,6 +23,9 @@ export default function Header({ onCategoryMenuClick, onCartClick, onSearch }) {
     const handleSearch = () => {
         onSearch(searchQuery);
     };
+    const selectedCategoryLabel = selectedCategory === 'all'
+        ? 'جميع الأقسام'
+        : categories.find((category) => category.name === selectedCategory)?.name || selectedCategory;
     const handleOtaUpdate = async () => {
         if (otaStatus === 'checking') return;
         setOtaStatus('checking');
@@ -65,14 +66,14 @@ export default function Header({ onCategoryMenuClick, onCartClick, onSearch }) {
             {/* Category dropdown */}
             <div className="relative" ref={catRef}>
               <button onClick={() => setCatDropdownOpen(!catDropdownOpen)} className="flex items-center gap-1.5 px-3 h-full bg-gray-50 hover:bg-gray-100 transition-colors border-l border-gray-200 whitespace-nowrap text-sm">
-                <span className="font-medium text-gray-700">{selectedCategory}</span>
+                <span className="font-medium text-gray-700">{selectedCategoryLabel}</span>
                 <ChevronDown size={16} className={`text-gray-500 transition-transform ${catDropdownOpen ? 'rotate-180' : ''}`}/>
               </button>
               {catDropdownOpen && (<div className="absolute top-full right-0 mt-0.5 w-56 bg-white rounded-lg shadow-2xl z-50 max-h-80 overflow-y-auto custom-scroll border border-gray-100">
-                  <button onClick={() => { setSelectedCategory('جميع الأقسام'); setCatDropdownOpen(false); }} className={`w-full text-right px-4 py-2.5 hover:bg-blue-50 transition-colors text-sm border-b border-gray-50 ${selectedCategory === 'جميع الأقسام' ? 'bg-blue-50 font-semibold text-brand-700' : ''}`}>
+                  <button onClick={() => { onCategorySelect('all'); setSearchQuery(''); setCatDropdownOpen(false); }} className={`w-full text-right px-4 py-2.5 hover:bg-blue-50 transition-colors text-sm border-b border-gray-50 ${selectedCategory === 'all' ? 'bg-blue-50 font-semibold text-brand-700' : ''}`}>
                     جميع الأقسام
                   </button>
-                  {categories.map((cat) => (<button key={cat.id} onClick={() => { setSelectedCategory(cat.name); setCatDropdownOpen(false); }} className={`w-full text-right px-4 py-2.5 hover:bg-blue-50 transition-colors text-sm border-b border-gray-50 last:border-0 ${selectedCategory === cat.name ? 'bg-blue-50 font-semibold text-brand-700' : ''}`}>
+                  {categories.map((cat) => (<button key={cat.id} onClick={() => { onCategorySelect(cat.name); setSearchQuery(''); setCatDropdownOpen(false); }} className={`w-full text-right px-4 py-2.5 hover:bg-blue-50 transition-colors text-sm border-b border-gray-50 last:border-0 ${selectedCategory === cat.name ? 'bg-blue-50 font-semibold text-brand-700' : ''}`}>
                       {cat.name}
                     </button>))}
                 </div>)}
@@ -95,15 +96,6 @@ export default function Header({ onCategoryMenuClick, onCartClick, onSearch }) {
             {/* Mobile search toggle */}
             <button onClick={() => setMobileSearchOpen(!mobileSearchOpen)} className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors" aria-label="بحث">
               <Search size={22} className="text-brand-800"/>
-            </button>
-
-            {/* Login */}
-            <button className="hidden sm:flex items-center gap-2 px-2 md:px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <User size={22} className="text-brand-800"/>
-              <div className="hidden lg:block text-right">
-                <div className="text-[11px] text-gray-500 leading-none">أهلاً بك</div>
-                <div className="text-sm font-semibold text-gray-800">تسجيل الدخول</div>
-              </div>
             </button>
 
             {/* Orders */}

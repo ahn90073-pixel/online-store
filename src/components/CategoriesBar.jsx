@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Menu, ChevronLeft, X, Smartphone, Shirt, Home, Refrigerator, Sparkles, Dumbbell, Camera, Watch } from 'lucide-react';
-import { categories } from '@/data/storeData';
 import { motion, AnimatePresence } from 'framer-motion';
 const iconMap = {
     Smartphone,
@@ -12,7 +11,7 @@ const iconMap = {
     Camera,
     Watch,
 };
-export default function CategoriesBar({ onMenuClick, onCategorySelect, drawerOpen, onDrawerClose, showBar = true }) {
+export default function CategoriesBar({ categories = [], onMenuClick, onCategorySelect, drawerOpen, onDrawerClose, showBar = true, hasFlashDeals = false }) {
     const [expandedCategory, setExpandedCategory] = useState(null);
     return (<>
       {showBar && <div className="bg-white border-b border-gray-200 sticky top-16 md:top-20 z-30 shadow-sm">
@@ -36,10 +35,10 @@ export default function CategoriesBar({ onMenuClick, onCategorySelect, drawerOpe
             </div>
 
             {/* Flash deals link */}
-            <button onClick={() => onCategorySelect('flash')} className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-accent-600 hover:bg-orange-50 transition-colors whitespace-nowrap flex-shrink-0 font-semibold">
+            {hasFlashDeals && <button onClick={() => onCategorySelect('flash')} className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-accent-600 hover:bg-orange-50 transition-colors whitespace-nowrap flex-shrink-0 font-semibold">
               <span className="text-base">⚡</span>
               <span>عروض فلاش</span>
-            </button>
+            </button>}
           </div>
         </div>
       </div>}
@@ -59,20 +58,24 @@ export default function CategoriesBar({ onMenuClick, onCategorySelect, drawerOpe
                 {categories.map((cat) => {
                 const Icon = iconMap[cat.icon] || Smartphone;
                 const isExpanded = expandedCategory === cat.id;
-                return (<div key={cat.id} className="border-b border-gray-100 last:border-0">
-                      <button onClick={() => setExpandedCategory(isExpanded ? null : cat.id)} className="w-full flex items-center justify-between p-3 hover:bg-blue-50 rounded-lg transition-colors">
+                    const subCategories = Array.isArray(cat.subCategories) ? cat.subCategories : [];
+                    return (<div key={cat.id} className="border-b border-gray-100 last:border-0">
+                      <button onClick={() => {
+                        if (subCategories.length === 0) { onCategorySelect(cat.name); onDrawerClose(); }
+                        else setExpandedCategory(isExpanded ? null : cat.id);
+                      }} className="w-full flex items-center justify-between p-3 hover:bg-blue-50 rounded-lg transition-colors">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center">
                             <Icon size={18} className="text-brand-700"/>
                           </div>
                           <span className="font-semibold text-gray-800 text-sm">{cat.name}</span>
                         </div>
-                        <ChevronLeft size={18} className={`text-gray-400 transition-transform ${isExpanded ? '-rotate-90' : ''}`}/>
+                        {subCategories.length > 0 && <ChevronLeft size={18} className={`text-gray-400 transition-transform ${isExpanded ? '-rotate-90' : ''}`}/>}
                       </button>
                       <AnimatePresence>
                         {isExpanded && (<motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                             <div className="pr-12 pb-2">
-                              {cat.subCategories.map((sub) => (<button key={sub} onClick={() => {
+                              {subCategories.map((sub) => (<button key={sub} onClick={() => {
                                 onCategorySelect(cat.name);
                                 onDrawerClose();
                             }} className="block w-full text-right py-2 px-3 text-sm text-gray-600 hover:text-brand-700 hover:bg-blue-50 rounded-lg transition-colors">

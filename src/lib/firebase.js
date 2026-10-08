@@ -1,6 +1,6 @@
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously } from 'firebase/auth';
-import { doc, getDoc, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
 
 // Firebase Web configuration is public client configuration, not an Admin credential.
 // Values are supplied through VITE_FIREBASE_* environment variables at build time.
@@ -55,30 +55,6 @@ export async function saveDeviceToken(token, platform) {
         token,
         platform,
         enabled: true,
-        updatedAt: serverTimestamp(),
-      }, { merge: true });
-      return;
-    } catch (error) {
-      lastError = error;
-      await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
-    }
-  }
-  throw lastError;
-}
-
-export async function loadCart() {
-  const user = await ensureFirebaseUser();
-  const snapshot = await getDoc(doc(db, 'carts', user.uid));
-  return snapshot.exists() && Array.isArray(snapshot.data().items) ? snapshot.data().items : [];
-}
-
-export async function saveCart(items) {
-  let lastError;
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    try {
-      const user = await ensureFirebaseUser();
-      await setDoc(doc(db, 'carts', user.uid), {
-        items,
         updatedAt: serverTimestamp(),
       }, { merge: true });
       return;

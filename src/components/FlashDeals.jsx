@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Zap, ChevronLeft, ChevronRight, Flame } from 'lucide-react';
-import { products } from '@/data/storeData';
 import ProductCard from './ProductCard';
 import { motion } from 'framer-motion';
-export default function FlashDeals({ onAddToCart }) {
+export default function FlashDeals({ products = [], onAddToCart }) {
     const [timeLeft, setTimeLeft] = useState({ hours: 8, minutes: 42, seconds: 15 });
     const [scrollEl, setScrollEl] = useState(null);
     useEffect(() => {
@@ -35,6 +34,7 @@ export default function FlashDeals({ onAddToCart }) {
         scrollEl.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
     };
     const pad = (n) => String(n).padStart(2, '0');
+    if (flashProducts.length === 0) return null;
     return (<section className="max-w-[1400px] mx-auto px-3 md:px-6 mt-6">
       <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
         {/* Header */}

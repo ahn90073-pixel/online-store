@@ -12,7 +12,6 @@ import ProductGrid from '@/components/ProductGrid';
 import TrustBadges from '@/components/TrustBadges';
 import Footer from '@/components/Footer';
 import CartDrawer from '@/components/CartDrawer';
-import NotificationTokenCard from '@/components/NotificationTokenCard';
 
 function Toast({ message, show }) {
   return (
@@ -121,7 +120,6 @@ function Storefront() {
       <CategoriesBar categories={categories} selectedCategory={selectedCategory} hasFlashDeals={flashProducts.length > 0} showBar={false} onMenuClick={() => setCategoryDrawerOpen(true)} onCategorySelect={handleCategorySelect} drawerOpen={categoryDrawerOpen} onDrawerClose={() => setCategoryDrawerOpen(false)} />
 
       <main className="pb-8">
-        <NotificationTokenCard />
         {productsLoading && <div className="mx-auto mt-5 flex max-w-7xl items-center justify-center gap-2 rounded-xl bg-white p-5 text-sm text-gray-600 shadow-sm"><LoaderCircle size={18} className="animate-spin text-brand-700" />جارٍ تحميل المنتجات المعتمدة من المتجر...</div>}
         {productsError && <div role="alert" className="mx-3 mt-5 flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 md:mx-6 md:flex-row md:items-center md:justify-between"><span><AlertTriangle size={17} className="ml-2 inline" />{productsError}</span><button type="button" onClick={loadProducts} className="flex items-center justify-center gap-2 rounded-lg bg-amber-800 px-4 py-2 font-semibold text-white hover:bg-amber-900"><RefreshCw size={15} />إعادة المحاولة</button></div>}
         {!productsLoading && !productsError && allProducts.length === 0 && <p className="mx-3 mt-5 rounded-xl bg-white p-5 text-center text-sm text-gray-600 shadow-sm md:mx-6">لا توجد منتجات معتمدة للعرض حاليًا.</p>}

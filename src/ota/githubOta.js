@@ -45,6 +45,16 @@ async function readManifest() {
   return manifest;
 }
 
+function normalizeBundleUrl(bundleUrl) {
+  const url = new URL(bundleUrl);
+  // Older manifests omitted the archive extension. CapacitorUpdater expects
+  // the actual ZIP asset, so keep old releases compatible as well.
+  if (!url.pathname.endsWith('.zip')) url.pathname = `${url.pathname}.zip`;
+  // Ask GitHub for the binary asset instead of an HTML release response.
+  url.searchParams.set('download', '1');
+  return url.toString();
+}
+
 export async function checkForOtaUpdate({ force = false, onStatus } = {}) {
   if (!Capacitor.isNativePlatform()) return { updated: false, skipped: true };
 
@@ -60,7 +70,7 @@ export async function checkForOtaUpdate({ force = false, onStatus } = {}) {
   onStatus?.('جاري تنزيل حزمة OTA...');
   const downloaded = await CapacitorUpdater.download({
     version: manifest.version,
-    url: manifest.bundleUrl,
+    url: normalizeBundleUrl(manifest.bundleUrl),
     checksum: manifest.sha256,
   });
 

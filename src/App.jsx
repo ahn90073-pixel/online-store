@@ -12,6 +12,7 @@ import ProductGrid from '@/components/ProductGrid';
 import TrustBadges from '@/components/TrustBadges';
 import Footer from '@/components/Footer';
 import CartDrawer from '@/components/CartDrawer';
+import { exitAndroidApp, registerAndroidBackButton } from '@/utils/androidBackButton';
 
 function Toast({ message, show }) {
   return (
@@ -53,6 +54,20 @@ function Storefront() {
     const timer = setTimeout(() => setToast({ show: false, message: '' }), 2500);
     return () => clearTimeout(timer);
   }, [toast.show]);
+
+  useEffect(() => {
+    let active = true;
+    let removeListener = () => {};
+    registerAndroidBackButton(() => {
+      if (cartDrawerOpen) return setCartDrawerOpen(false);
+      if (categoryDrawerOpen) return setCategoryDrawerOpen(false);
+      return exitAndroidApp();
+    }).then((remove) => {
+      if (active) removeListener = remove;
+      else remove();
+    });
+    return () => { active = false; removeListener(); };
+  }, [cartDrawerOpen, categoryDrawerOpen]);
 
   const showToast = useCallback((message) => setToast({ show: true, message }), []);
   const categories = useMemo(() => {

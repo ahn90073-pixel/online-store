@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, CheckCircle2, LoaderCircle, RefreshCw } from 'lucide-react';
 import { CartProvider, useCart } from '@/context/CartContext';
 import { fetchStorefrontProducts } from '@/api/storefront';
-import TopBar from '@/components/TopBar';
 import Header from '@/components/Header';
 import CategoriesBar from '@/components/CategoriesBar';
+import { categories as catalogCategories } from '@/data/storeData';
 import HeroSection from '@/components/HeroSection';
 import FlashDeals from '@/components/FlashDeals';
 import ProductGrid from '@/components/ProductGrid';
@@ -58,7 +58,11 @@ function Storefront() {
   const showToast = useCallback((message) => setToast({ show: true, message }), []);
   const categories = useMemo(() => {
     const names = [...new Set(allProducts.map((product) => product.category).filter(Boolean))];
-    return names.map((name, index) => ({ id: `api-category-${index}`, name, icon: 'Smartphone', subCategories: [] }));
+    const apiCategories = names.map((name, index) => ({ id: `api-category-${index}`, name, icon: 'Smartphone', subCategories: [] }));
+    return [
+      ...catalogCategories,
+      ...apiCategories.filter((category) => !catalogCategories.some((item) => item.name === category.name)),
+    ];
   }, [allProducts]);
 
   const handleAddToCart = useCallback((product) => {
@@ -113,9 +117,8 @@ function Storefront() {
   return (
     <div className="min-h-screen bg-gray-100" dir="rtl">
       <Toast message={toast.message} show={toast.show} />
-      <TopBar />
       <Header categories={categories} selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} onCategoryMenuClick={() => setCategoryDrawerOpen(true)} onCartClick={() => setCartDrawerOpen(true)} onSearch={handleSearch} />
-      <CategoriesBar categories={categories} selectedCategory={selectedCategory} hasFlashDeals={flashProducts.length > 0} showBar onMenuClick={() => setCategoryDrawerOpen(true)} onCategorySelect={handleCategorySelect} drawerOpen={categoryDrawerOpen} onDrawerClose={() => setCategoryDrawerOpen(false)} />
+      <CategoriesBar categories={categories} selectedCategory={selectedCategory} hasFlashDeals={flashProducts.length > 0} showBar={false} onMenuClick={() => setCategoryDrawerOpen(true)} onCategorySelect={handleCategorySelect} drawerOpen={categoryDrawerOpen} onDrawerClose={() => setCategoryDrawerOpen(false)} />
 
       <main className="pb-8">
         <NotificationTokenCard />

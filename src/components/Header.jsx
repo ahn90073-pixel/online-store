@@ -48,8 +48,9 @@ export default function Header({ categories = [], selectedCategory = 'all', onCa
       <div className="max-w-[1400px] mx-auto px-3 md:px-6">
         <div className="h-16 md:h-20 flex items-center gap-2 md:gap-4">
           {/* Mobile menu button */}
-          <button onClick={onCategoryMenuClick} className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors" aria-label="القائمة">
+          <button onClick={onCategoryMenuClick} className="flex items-center gap-1.5 rounded-lg bg-brand-50 p-2 text-sm font-semibold text-brand-800 transition-colors hover:bg-brand-100 md:px-3" aria-label="فتح قائمة الأقسام">
             <Menu size={24} className="text-brand-800"/>
+            <span className="hidden md:inline">الأقسام</span>
           </button>
 
           {/* Logo */}

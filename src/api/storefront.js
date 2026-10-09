@@ -35,6 +35,10 @@ export function mapStoreProduct(product) {
     ? null
     : Number(product.compareAtPrice)
   const weightGrams = Number(product?.weightGrams || 0)
+  // The legacy storefront API calls this stockQuantity, while the newer
+  // tenant API exposes availableQuantity. Accept both during the migration.
+  const rawStockQuantity = product?.stockQuantity ?? product?.availableQuantity ?? product?.stock_quantity
+  const stockQuantity = Number(rawStockQuantity ?? 0)
   return {
     id: product?.id,
     productId: product?.id,
@@ -47,7 +51,7 @@ export function mapStoreProduct(product) {
     price,
     oldPrice: compareAtPrice > price ? compareAtPrice : null,
     currency: product?.currency || 'EGP',
-    stockQuantity: Number(product?.stockQuantity || 0),
+    stockQuantity: Number.isFinite(stockQuantity) && stockQuantity >= 0 ? stockQuantity : 0,
     seller: product?.sellerName || product?.vendorName || 'تاجر معتمد',
     trustedSeller: Boolean(product?.trustedSeller),
     badge: product?.badge || '',
@@ -64,15 +68,15 @@ export async function fetchStorefrontProducts({ search = '', category = '', limi
   if (search) params.set('q', search)
   if (category && category !== 'all') params.set('category', category)
   const first = await request(`/products?${params.toString()}`)
-  const firstItems = first?.items || []
-  const totalPages = Math.min(20, Math.max(1, Number(first?.pagination?.totalPages) || 1))
+  const firstItems = Array.isArray(first) ? first : (first?.items || [])
+  const totalPages = Math.min(20, Math.max(1, Number(first?.pagination?.totalPages ?? first?.pagination?.pages) || 1))
   if (totalPages === 1) return firstItems.map(mapStoreProduct)
 
   const pages = await Promise.all(Array.from({ length: totalPages - 1 }, async (_, index) => {
     const pageParams = new URLSearchParams(params)
     pageParams.set('page', String(index + 2))
     const result = await request(`/products?${pageParams.toString()}`)
-    return result?.items || []
+    return Array.isArray(result) ? result : (result?.items || [])
   }))
   return firstItems.concat(...pages).map(mapStoreProduct)
 }

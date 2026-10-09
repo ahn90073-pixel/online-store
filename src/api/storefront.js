@@ -46,7 +46,9 @@ export function mapStoreProduct(product) {
     vendorName: product?.vendorName || '',
     name: product?.name || '',
     description: product?.description || '',
-    category: product?.category || 'عام',
+    category: typeof product?.category === 'object'
+      ? (product.category?.name || product.category?.slug || 'عام')
+      : (product?.category || 'عام'),
     image: product?.imageUrl || '',
     price,
     oldPrice: compareAtPrice > price ? compareAtPrice : null,

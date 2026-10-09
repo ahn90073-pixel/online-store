@@ -115,7 +115,7 @@ function Storefront() {
       <Toast message={toast.message} show={toast.show} />
       <TopBar />
       <Header categories={categories} selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} onCategoryMenuClick={() => setCategoryDrawerOpen(true)} onCartClick={() => setCartDrawerOpen(true)} onSearch={handleSearch} />
-      <CategoriesBar categories={categories} hasFlashDeals={flashProducts.length > 0} showBar onMenuClick={() => setCategoryDrawerOpen(true)} onCategorySelect={handleCategorySelect} drawerOpen={categoryDrawerOpen} onDrawerClose={() => setCategoryDrawerOpen(false)} />
+      <CategoriesBar categories={categories} selectedCategory={selectedCategory} hasFlashDeals={flashProducts.length > 0} showBar onMenuClick={() => setCategoryDrawerOpen(true)} onCategorySelect={handleCategorySelect} drawerOpen={categoryDrawerOpen} onDrawerClose={() => setCategoryDrawerOpen(false)} />
 
       <main className="pb-8">
         <NotificationTokenCard />

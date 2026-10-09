@@ -11,7 +11,7 @@ const iconMap = {
     Camera,
     Watch,
 };
-export default function CategoriesBar({ categories = [], onMenuClick, onCategorySelect, drawerOpen, onDrawerClose, showBar = true, hasFlashDeals = false }) {
+export default function CategoriesBar({ categories = [], selectedCategory = 'all', onMenuClick, onCategorySelect, drawerOpen, onDrawerClose, showBar = true, hasFlashDeals = false }) {
     const [expandedCategory, setExpandedCategory] = useState(null);
     return (<>
       {showBar && <div className="bg-white border-b border-gray-200 sticky top-16 md:top-20 z-30 shadow-sm">
@@ -27,7 +27,8 @@ export default function CategoriesBar({ categories = [], onMenuClick, onCategory
             <div className="flex items-center gap-1 overflow-x-auto no-scrollbar flex-1">
               {categories.map((cat) => {
             const Icon = iconMap[cat.icon] || Smartphone;
-            return (<button key={cat.id} onClick={() => onCategorySelect(cat.name)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-gray-700 hover:bg-blue-50 hover:text-brand-700 transition-colors whitespace-nowrap flex-shrink-0">
+            const active = selectedCategory === cat.name;
+            return (<button key={cat.id} onClick={() => onCategorySelect(cat.name)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors whitespace-nowrap flex-shrink-0 ${active ? 'bg-blue-50 text-brand-700 font-bold' : 'text-gray-700 hover:bg-blue-50 hover:text-brand-700'}`} aria-pressed={active}>
                     <Icon size={16} className="text-brand-600"/>
                     <span>{cat.name}</span>
                   </button>);
@@ -55,6 +56,9 @@ export default function CategoriesBar({ categories = [], onMenuClick, onCategory
                 </button>
               </div>
               <div className="p-2">
+                <button onClick={() => { onCategorySelect('all'); onDrawerClose(); }} className={`mb-1 w-full rounded-lg p-3 text-right text-sm transition-colors ${selectedCategory === 'all' ? 'bg-blue-50 font-bold text-brand-700' : 'text-gray-700 hover:bg-blue-50'}`}>
+                  كل المنتجات
+                </button>
                 {categories.map((cat) => {
                 const Icon = iconMap[cat.icon] || Smartphone;
                 const isExpanded = expandedCategory === cat.id;
@@ -68,7 +72,7 @@ export default function CategoriesBar({ categories = [], onMenuClick, onCategory
                           <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center">
                             <Icon size={18} className="text-brand-700"/>
                           </div>
-                          <span className="font-semibold text-gray-800 text-sm">{cat.name}</span>
+                          <span className={`text-sm ${selectedCategory === cat.name ? 'font-bold text-brand-700' : 'font-semibold text-gray-800'}`}>{cat.name}</span>
                         </div>
                         {subCategories.length > 0 && <ChevronLeft size={18} className={`text-gray-400 transition-transform ${isExpanded ? '-rotate-90' : ''}`}/>}
                       </button>

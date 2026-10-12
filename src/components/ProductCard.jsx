@@ -1,14 +1,31 @@
-import { useState } from 'react';
-import { Heart, ShoppingCart, BadgeCheck, Truck } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { Heart, ShoppingCart, BadgeCheck, Truck, X, ChevronLeft, ChevronRight, Images } from 'lucide-react';
 import StarRating from './StarRating';
 export default function ProductCard({ product, onAddToCart, compact }) {
     const [isFavorite, setIsFavorite] = useState(false);
     const [heartAnim, setHeartAnim] = useState(false);
     const [activeImageIndex, setActiveImageIndex] = useState(0);
+    const [galleryOpen, setGalleryOpen] = useState(false);
     const productImages = Array.isArray(product.images) && product.images.length
       ? product.images.filter(Boolean)
       : (product.image ? [product.image] : []);
     const currentImage = productImages[Math.min(activeImageIndex, productImages.length - 1)] || product.image;
+    const moveImage = useCallback((direction) => setActiveImageIndex((index) => (index + direction + productImages.length) % productImages.length), [productImages.length]);
+    useEffect(() => {
+        if (!galleryOpen) return undefined;
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape') setGalleryOpen(false);
+            if (event.key === 'ArrowLeft') moveImage(1);
+            if (event.key === 'ArrowRight') moveImage(-1);
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.body.style.overflow = previousOverflow;
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [galleryOpen, moveImage]);
     const handleFavorite = () => {
         setIsFavorite(!isFavorite);
         setHeartAnim(true);
@@ -17,7 +34,8 @@ export default function ProductCard({ product, onAddToCart, compact }) {
     const handleAddToCart = () => {
         onAddToCart(product);
     };
-    return (<div className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-xl hover:border-gray-200 transition-all duration-300 flex flex-col group">
+    return (<>
+      <div className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-xl hover:border-gray-200 transition-all duration-300 flex flex-col group">
       {/* Image section */}
       <div className="relative bg-gray-50 overflow-hidden aspect-square">
         {/* Badge */}
@@ -33,9 +51,13 @@ export default function ProductCard({ product, onAddToCart, compact }) {
         </button>
 
         {/* Product image with zoom effect */}
-        <div className="w-full h-full p-4">
-          {currentImage ? <img src={currentImage} alt={product.name} loading="lazy" className="zoom-img w-full h-full object-contain"/> : <div className="flex h-full items-center justify-center text-sm text-gray-400">لا توجد صورة</div>}
-        </div>
+        <button type="button" onClick={() => productImages.length && setGalleryOpen(true)} disabled={!productImages.length} className="absolute inset-0 z-0 flex h-full w-full items-center justify-center p-4 disabled:cursor-default" aria-label={`عرض صور ${product.name}`}>
+          {currentImage ? <img src={currentImage} alt={product.name} loading="lazy" className="zoom-img h-full w-full object-contain"/> : <span className="text-sm text-gray-400">لا توجد صورة</span>}
+        </button>
+
+        {productImages.length > 0 && <span className="pointer-events-none absolute left-1/2 top-2 z-[1] -translate-x-1/2 rounded-full bg-black/55 px-2 py-1 text-[10px] font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+          <Images size={12} className="ml-1 inline"/>اضغط لعرض الصور
+        </span>}
 
         {productImages.length > 1 && <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-white/85 px-2 py-1 shadow-sm" aria-label="صور المنتج">
           {productImages.map((image, index) => <button key={`${image}-${index}`} type="button" onClick={(event) => { event.stopPropagation(); setActiveImageIndex(index); }} aria-label={`عرض الصورة ${index + 1}`} aria-pressed={activeImageIndex === index} className={`h-2 w-2 rounded-full transition-colors ${activeImageIndex === index ? 'bg-brand-700' : 'bg-gray-300 hover:bg-gray-500'}`} />)}
@@ -92,5 +114,24 @@ export default function ProductCard({ product, onAddToCart, compact }) {
             </button>)}
         </div>
       </div>
-    </div>);
+      </div>
+      {galleryOpen && <div role="dialog" aria-modal="true" aria-label={`معرض صور ${product.name}`} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-3 md:p-8" onMouseDown={(event) => { if (event.target === event.currentTarget) setGalleryOpen(false); }}>
+        <button type="button" onClick={() => setGalleryOpen(false)} className="absolute left-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25" aria-label="إغلاق معرض الصور"><X size={24}/></button>
+        <div className="flex h-full w-full max-w-6xl flex-col items-center justify-center gap-3">
+          <div className="relative flex min-h-0 flex-1 items-center justify-center w-full">
+            <img src={productImages[activeImageIndex]} alt={`${product.name} — الصورة ${activeImageIndex + 1}`} className="max-h-full max-w-full select-none object-contain" />
+            {productImages.length > 1 && <>
+              <button type="button" onClick={() => moveImage(-1)} className="absolute right-1 md:right-4 flex h-11 w-11 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70" aria-label="الصورة السابقة"><ChevronRight size={26}/></button>
+              <button type="button" onClick={() => moveImage(1)} className="absolute left-1 md:left-4 flex h-11 w-11 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70" aria-label="الصورة التالية"><ChevronLeft size={26}/></button>
+            </>}
+          </div>
+          <p className="text-center text-sm font-semibold text-white">{product.name} <span className="mr-2 text-white/70">{activeImageIndex + 1} / {productImages.length}</span></p>
+          {productImages.length > 1 && <div className="no-scrollbar flex max-w-full gap-2 overflow-x-auto pb-1">
+            {productImages.map((image, index) => <button key={`${image}-${index}`} type="button" onClick={() => setActiveImageIndex(index)} aria-label={`عرض الصورة ${index + 1}`} aria-pressed={activeImageIndex === index} className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 bg-white/10 md:h-20 md:w-20 ${activeImageIndex === index ? 'border-white' : 'border-white/30 opacity-70 hover:opacity-100'}`}>
+              <img src={image} alt="" className="h-full w-full object-contain" />
+            </button>)}
+          </div>}
+        </div>
+      </div>}
+    </>);
 }

@@ -39,6 +39,10 @@ export function mapStoreProduct(product) {
   // tenant API exposes availableQuantity. Accept both during the migration.
   const rawStockQuantity = product?.stockQuantity ?? product?.availableQuantity ?? product?.stock_quantity
   const stockQuantity = Number(rawStockQuantity ?? 0)
+  const images = Array.isArray(product?.images)
+    ? product.images.map((image) => typeof image === 'string' ? image : image?.url).filter(Boolean)
+    : []
+  const imageUrls = images.length ? images : (product?.imageUrl ? [product.imageUrl] : [])
   return {
     id: product?.id,
     productId: product?.id,
@@ -49,7 +53,8 @@ export function mapStoreProduct(product) {
     category: product?.metadata?.categoryLabel || (typeof product?.category === 'object'
       ? (product.category?.name || product.category?.slug || 'عام')
       : (product?.category || 'عام')),
-    image: product?.imageUrl || '',
+    images: imageUrls,
+    image: imageUrls[0] || '',
     price,
     oldPrice: compareAtPrice > price ? compareAtPrice : null,
     currency: product?.currency || 'EGP',

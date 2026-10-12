@@ -4,6 +4,11 @@ import StarRating from './StarRating';
 export default function ProductCard({ product, onAddToCart, compact }) {
     const [isFavorite, setIsFavorite] = useState(false);
     const [heartAnim, setHeartAnim] = useState(false);
+    const [activeImageIndex, setActiveImageIndex] = useState(0);
+    const productImages = Array.isArray(product.images) && product.images.length
+      ? product.images.filter(Boolean)
+      : (product.image ? [product.image] : []);
+    const currentImage = productImages[Math.min(activeImageIndex, productImages.length - 1)] || product.image;
     const handleFavorite = () => {
         setIsFavorite(!isFavorite);
         setHeartAnim(true);
@@ -29,8 +34,12 @@ export default function ProductCard({ product, onAddToCart, compact }) {
 
         {/* Product image with zoom effect */}
         <div className="w-full h-full p-4">
-          {product.image ? <img src={product.image} alt={product.name} loading="lazy" className="zoom-img w-full h-full object-contain"/> : <div className="flex h-full items-center justify-center text-sm text-gray-400">لا توجد صورة</div>}
+          {currentImage ? <img src={currentImage} alt={product.name} loading="lazy" className="zoom-img w-full h-full object-contain"/> : <div className="flex h-full items-center justify-center text-sm text-gray-400">لا توجد صورة</div>}
         </div>
+
+        {productImages.length > 1 && <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-white/85 px-2 py-1 shadow-sm" aria-label="صور المنتج">
+          {productImages.map((image, index) => <button key={`${image}-${index}`} type="button" onClick={(event) => { event.stopPropagation(); setActiveImageIndex(index); }} aria-label={`عرض الصورة ${index + 1}`} aria-pressed={activeImageIndex === index} className={`h-2 w-2 rounded-full transition-colors ${activeImageIndex === index ? 'bg-brand-700' : 'bg-gray-300 hover:bg-gray-500'}`} />)}
+        </div>}
 
         {Number(product.stockQuantity) < 1 && <div className="absolute bottom-2 left-2 rounded-md bg-gray-800/85 px-2 py-1 text-[10px] font-semibold text-white">نفد المخزون</div>}
 

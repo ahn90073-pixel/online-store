@@ -15,7 +15,7 @@ function publishToken(token) {
 
 /**
  * Initializes native push notifications.
- * The token is logged for testing and can later be sent to the backend.
+ * The token is persisted locally and, when supplied, acknowledged by the backend.
  */
 export async function initializePushNotifications({ onToken, onNotification, onAction } = {}) {
   if (!Capacitor.isNativePlatform()) {
@@ -52,11 +52,22 @@ export async function initializePushNotifications({ onToken, onNotification, onA
         });
       }
 
-      listeners.push(await PushNotifications.addListener('registration', (token) => {
+      let resolveToken;
+      let rejectToken;
+      const tokenReady = new Promise((resolve, reject) => {
+        resolveToken = resolve;
+        rejectToken = reject;
+      });
+      listeners.push(await PushNotifications.addListener('registration', async (token) => {
         // This is the FCM token on Android and the APNs/FCM token provided by iOS.
         console.info('[Push] Device token received');
         publishToken(token.value);
-        onToken?.(token.value);
+        try {
+          await onToken?.(token.value);
+          resolveToken(token.value);
+        } catch (error) {
+          rejectToken(error);
+        }
       }));
 
       listeners.push(await PushNotifications.addListener('registrationError', (error) => {
@@ -74,7 +85,18 @@ export async function initializePushNotifications({ onToken, onNotification, onA
       }));
 
       await PushNotifications.register();
-      return { enabled: true, permission: receive };
+      let timeoutId;
+      try {
+        const token = await Promise.race([
+          tokenReady,
+          new Promise((_, reject) => {
+            timeoutId = window.setTimeout(() => reject(new Error('انتهت مهلة تسجيل رمز الإشعارات.')), 20000);
+          }),
+        ]);
+        return { enabled: true, permission: receive, token };
+      } finally {
+        window.clearTimeout(timeoutId);
+      }
     } catch (error) {
       for (const listener of listeners) await listener.remove().catch(() => {});
       throw error;

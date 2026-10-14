@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search, ShoppingCart, Menu, ChevronDown, Heart, Package, X, RefreshCw } from 'lucide-react';
+import { Search, ShoppingCart, Menu, ChevronDown, Heart, Package, X, RefreshCw, Bell } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import { useCart } from '@/context/CartContext';
 import { checkForOtaUpdate } from '@/ota/githubOta';
+import { getStoredFcmToken, initializePushNotifications } from '@/notifications/pushNotifications';
 import storeIcon from '../../asset/store-icon-1024.png';
 export default function Header({ categories = [], selectedCategory = 'all', onCategorySelect, onCategoryMenuClick, onCartClick, onSearch }) {
     const { cartCount } = useCart();
@@ -10,6 +12,8 @@ export default function Header({ categories = [], selectedCategory = 'all', onCa
     const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
     const [otaStatus, setOtaStatus] = useState('idle');
     const [otaMessage, setOtaMessage] = useState('');
+    const isNative = Capacitor.isNativePlatform();
+    const [pushStatus, setPushStatus] = useState(() => getStoredFcmToken() ? 'enabled' : 'idle');
     const catRef = useRef(null);
     useEffect(() => {
         function handleClickOutside(e) {
@@ -22,6 +26,23 @@ export default function Header({ categories = [], selectedCategory = 'all', onCa
     }, []);
     const handleSearch = () => {
         onSearch(searchQuery);
+    };
+    useEffect(() => {
+        if (!isNative) return undefined;
+        const handleTokenUpdate = () => setPushStatus('enabled');
+        window.addEventListener('fcm-token-updated', handleTokenUpdate);
+        return () => window.removeEventListener('fcm-token-updated', handleTokenUpdate);
+    }, [isNative]);
+    const handlePushActivation = async () => {
+        if (pushStatus === 'activating') return;
+        setPushStatus('activating');
+        try {
+            const result = await initializePushNotifications();
+            setPushStatus(result.enabled ? 'enabled' : result.reason === 'permission-denied' ? 'denied' : 'error');
+        } catch (error) {
+            console.warn('[Push] Manual activation failed:', error);
+            setPushStatus('error');
+        }
     };
     const selectedCategoryLabel = selectedCategory === 'all'
         ? 'جميع الأقسام'
@@ -94,6 +115,11 @@ export default function Header({ categories = [], selectedCategory = 'all', onCa
               <span className="hidden sm:inline">{otaStatus === 'checking' ? 'جاري الفحص' : 'تحديث'}</span>
             </button>
             {otaMessage && <span className={`absolute top-full left-2 mt-1 z-50 max-w-[220px] rounded-lg px-2 py-1 text-[10px] shadow-lg ${otaStatus === 'error' ? 'bg-red-600 text-white' : 'bg-gray-800 text-white'}`} role="status">{otaMessage}</span>}
+            {isNative && <button type="button" onClick={handlePushActivation} disabled={pushStatus === 'activating'} className="flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-2 text-xs font-bold text-emerald-700 transition-colors hover:bg-emerald-100 disabled:cursor-default disabled:opacity-70 sm:text-sm" aria-label="تفعيل إشعارات الطلبات" title="تفعيل إشعارات الطلبات">
+              <Bell size={16} />
+              <span className="hidden sm:inline">{pushStatus === 'activating' ? 'جارٍ التفعيل' : pushStatus === 'enabled' ? 'الإشعارات مفعلة' : pushStatus === 'denied' ? 'السماح بالإشعارات' : pushStatus === 'error' ? 'إعادة المحاولة' : 'تفعيل الإشعارات'}</span>
+            </button>}
+
             {/* Mobile search toggle */}
             <button onClick={() => setMobileSearchOpen(!mobileSearchOpen)} className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors" aria-label="بحث">
               <Search size={22} className="text-brand-800"/>

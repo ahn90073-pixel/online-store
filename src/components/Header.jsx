@@ -3,7 +3,8 @@ import { Search, ShoppingCart, Menu, ChevronDown, Heart, Package, X, RefreshCw, 
 import { Capacitor } from '@capacitor/core';
 import { useCart } from '@/context/CartContext';
 import { checkForOtaUpdate } from '@/ota/githubOta';
-import { getStoredFcmToken, initializePushNotifications } from '@/notifications/pushNotifications';
+import { initializePushNotifications } from '@/notifications/pushNotifications';
+import { registerCustomerNotificationToken } from '@/api/storefront';
 import storeIcon from '../../asset/store-icon-1024.png';
 export default function Header({ categories = [], selectedCategory = 'all', onCategorySelect, onCategoryMenuClick, onCartClick, onSearch }) {
     const { cartCount } = useCart();
@@ -13,7 +14,7 @@ export default function Header({ categories = [], selectedCategory = 'all', onCa
     const [otaStatus, setOtaStatus] = useState('idle');
     const [otaMessage, setOtaMessage] = useState('');
     const isNative = Capacitor.isNativePlatform();
-    const [pushStatus, setPushStatus] = useState(() => getStoredFcmToken() ? 'enabled' : 'idle');
+    const [pushStatus, setPushStatus] = useState('idle');
     const catRef = useRef(null);
     useEffect(() => {
         function handleClickOutside(e) {
@@ -27,17 +28,17 @@ export default function Header({ categories = [], selectedCategory = 'all', onCa
     const handleSearch = () => {
         onSearch(searchQuery);
     };
-    useEffect(() => {
-        if (!isNative) return undefined;
-        const handleTokenUpdate = () => setPushStatus('enabled');
-        window.addEventListener('fcm-token-updated', handleTokenUpdate);
-        return () => window.removeEventListener('fcm-token-updated', handleTokenUpdate);
-    }, [isNative]);
     const handlePushActivation = async () => {
         if (pushStatus === 'activating') return;
         setPushStatus('activating');
         try {
-            const result = await initializePushNotifications();
+            const result = await initializePushNotifications({
+                onToken: (token) => registerCustomerNotificationToken({
+                    token,
+                    platform: Capacitor.getPlatform(),
+                    appVersion: import.meta.env.VITE_APP_VERSION || '1.0.0',
+                }),
+            });
             setPushStatus(result.enabled ? 'enabled' : result.reason === 'permission-denied' ? 'denied' : 'error');
         } catch (error) {
             console.warn('[Push] Manual activation failed:', error);

@@ -105,4 +105,11 @@ export function createStoreOrder({ customer, address, items, customerNote = '', 
   })
 }
 
+export function registerCustomerNotificationToken({ token, platform, appVersion }) {
+  return request('/notifications/token', {
+    method: 'POST',
+    body: { token, platform, appVersion },
+  })
+}
+
 export { STORE_API_BASE }

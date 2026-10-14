@@ -1,8 +1,8 @@
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
-import { saveDeviceToken } from '@/lib/firebase';
 
 const FCM_TOKEN_STORAGE_KEY = 'online-store-fcm-token';
+let initializationPromise = null;
 
 function publishToken(token) {
   try {
@@ -22,57 +22,79 @@ export async function initializePushNotifications({ onToken, onNotification, onA
     return { enabled: false, reason: 'web' };
   }
 
-  const permission = await PushNotifications.checkPermissions();
-  let receive = permission.receive;
+  if (initializationPromise) return initializationPromise;
 
-  if (receive !== 'granted') {
-    const requested = await PushNotifications.requestPermissions();
-    receive = requested.receive;
+  initializationPromise = (async () => {
+    const listeners = [];
+    try {
+      const permission = await PushNotifications.checkPermissions();
+      let receive = permission.receive;
+
+      if (receive !== 'granted') {
+        const requested = await PushNotifications.requestPermissions();
+        receive = requested.receive;
+      }
+
+      if (receive !== 'granted') {
+        console.warn('[Push] Notification permission was not granted:', receive);
+        return { enabled: false, reason: 'permission-denied' };
+      }
+
+      if (Capacitor.getPlatform() === 'android') {
+        await PushNotifications.createChannel({
+          id: 'store-default',
+          name: 'إشعارات المتجر',
+          description: 'تنبيهات الطلبات والعروض الجديدة',
+          importance: 5,
+          visibility: 1,
+          sound: 'default',
+          vibration: true,
+        });
+      }
+
+      listeners.push(await PushNotifications.addListener('registration', (token) => {
+        // This is the FCM token on Android and the APNs/FCM token provided by iOS.
+        console.info('[Push] Device token received');
+        publishToken(token.value);
+        onToken?.(token.value);
+      }));
+
+      listeners.push(await PushNotifications.addListener('registrationError', (error) => {
+        console.error('[Push] Registration failed:', error);
+      }));
+
+      listeners.push(await PushNotifications.addListener('pushNotificationReceived', (notification) => {
+        console.info('[Push] Notification received:', notification);
+        onNotification?.(notification);
+      }));
+
+      listeners.push(await PushNotifications.addListener('pushNotificationActionPerformed', (event) => {
+        console.info('[Push] Notification opened:', event);
+        onAction?.(event);
+      }));
+
+      await PushNotifications.register();
+      return { enabled: true, permission: receive };
+    } catch (error) {
+      for (const listener of listeners) await listener.remove().catch(() => {});
+      throw error;
+    }
+  })();
+
+  try {
+    const result = await initializationPromise;
+    if (!result.enabled) initializationPromise = null;
+    return result;
+  } catch (error) {
+    initializationPromise = null;
+    throw error;
   }
+}
 
-  if (receive !== 'granted') {
-    console.warn('[Push] Notification permission was not granted:', receive);
-    return { enabled: false, reason: 'permission-denied' };
+export function getStoredFcmToken() {
+  try {
+    return localStorage.getItem(FCM_TOKEN_STORAGE_KEY) || '';
+  } catch {
+    return '';
   }
-
-  if (Capacitor.getPlatform() === 'android') {
-    await PushNotifications.createChannel({
-      id: 'store-default',
-      name: 'إشعارات المتجر',
-      description: 'تنبيهات الطلبات والعروض الجديدة',
-      importance: 5,
-      visibility: 1,
-      sound: 'default',
-      vibration: true,
-    });
-  }
-
-  await PushNotifications.addListener('registration', (token) => {
-    // This is the FCM token on Android and the APNs/FCM token provided by iOS.
-    console.info('[Push] Device token received:', token.value);
-    publishToken(token.value);
-    onToken?.(token.value);
-    saveDeviceToken(token.value, Capacitor.getPlatform()).then(() => {
-      console.info('[Push] Token saved in Firebase Firestore');
-    }).catch((error) => {
-      console.warn('[Push] Firebase token registration skipped:', error);
-    });
-  });
-
-  await PushNotifications.addListener('registrationError', (error) => {
-    console.error('[Push] Registration failed:', error);
-  });
-
-  await PushNotifications.addListener('pushNotificationReceived', (notification) => {
-    console.info('[Push] Notification received:', notification);
-    onNotification?.(notification);
-  });
-
-  await PushNotifications.addListener('pushNotificationActionPerformed', (event) => {
-    console.info('[Push] Notification opened:', event);
-    onAction?.(event);
-  });
-
-  await PushNotifications.register();
-  return { enabled: true, permission: receive };
 }

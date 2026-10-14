@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { X, Plus, Minus, Trash2, ShoppingCart, ShoppingBag, LoaderCircle, CheckCircle2, Truck } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import { useCart } from '@/context/CartContext';
 import { createStoreOrder } from '@/api/storefront';
+import { getStoredFcmToken } from '@/notifications/pushNotifications';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const emptyCustomer = { fullName: '', phone: '', email: '' };
@@ -22,6 +24,7 @@ export default function CartDrawer({ open, onClose }) {
   const [customer, setCustomer] = useState(emptyCustomer);
   const [address, setAddress] = useState(emptyAddress);
   const [customerNote, setCustomerNote] = useState('');
+  const [notificationConsent, setNotificationConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [submittedOrders, setSubmittedOrders] = useState(null);
@@ -40,6 +43,10 @@ export default function CartDrawer({ open, onClose }) {
   const submitOrder = async (event) => {
     event.preventDefault();
     if (submitting || cartItems.length === 0) return;
+    if (notificationConsent && !getStoredFcmToken()) {
+      setError('لم يصل رمز الإشعارات إلى هذا الجهاز بعد. فعّل الإشعارات من أعلى الصفحة وانتظر لحظات، أو ألغِ الموافقة لإكمال الطلب دون إشعارات.');
+      return;
+    }
     setSubmitting(true);
     setError('');
     try {
@@ -48,6 +55,11 @@ export default function CartDrawer({ open, onClose }) {
         address: { ...address, governorate: address.governorate.trim(), city: address.city.trim(), street: address.street.trim() },
         items: cartItems,
         customerNote: customerNote.trim(),
+        ...(notificationConsent ? {
+          fcmToken: getStoredFcmToken(),
+          notificationConsent: true,
+          platform: Capacitor.isNativePlatform() ? Capacitor.getPlatform() : 'web',
+        } : {}),
       });
       setSubmittedOrders(result?.orders || []);
       clearCart();
@@ -96,6 +108,7 @@ export default function CartDrawer({ open, onClose }) {
                     <TextField label="ملاحظات العنوان" value={address.notes} onChange={updateAddress('notes')} placeholder="اختياري" />
                   </section>
                   <section className="space-y-2 border-t border-gray-100 pt-4"><label className="block text-sm font-semibold text-gray-700" htmlFor="customer-note">ملاحظات للطلب (اختياري)</label><textarea id="customer-note" rows={3} maxLength={1000} value={customerNote} onChange={(event) => setCustomerNote(event.target.value)} className="w-full resize-y rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-blue-100" /></section>
+                  {Capacitor.isNativePlatform() && <label className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/60 p-3 text-sm leading-6 text-blue-950"><input type="checkbox" checked={notificationConsent} onChange={(event) => setNotificationConsent(event.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-brand-700" /> <span><strong>أوافق على إشعارات حالة الطلب</strong><span className="mt-1 block text-xs text-blue-800">اختياري. فعّل إشعارات الهاتف من رأس الصفحة أولًا لاستقبال التنبيهات عندما يجهز الطلب أو تتغير حالته.</span></span></label>}
                   <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900"><Truck size={15} className="ml-1 inline" />الدفع عند الاستلام. رسوم الشحن النهائية يحددها فريق الإدارة بعد مراجعة الطلب.</div>
                 </div>
                 <div className="flex-shrink-0 border-t border-gray-200 bg-white p-4">

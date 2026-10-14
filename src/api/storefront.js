@@ -88,7 +88,7 @@ export async function fetchStorefrontProducts({ search = '', category = '', limi
   return firstItems.concat(...pages).map(mapStoreProduct)
 }
 
-export function createStoreOrder({ customer, address, items, customerNote = '' }) {
+export function createStoreOrder({ customer, address, items, customerNote = '', fcmToken, notificationConsent = false, platform }) {
   return request('/checkout', {
     method: 'POST',
     body: {
@@ -100,6 +100,7 @@ export function createStoreOrder({ customer, address, items, customerNote = '' }
         quantity: item.quantity,
       })),
       customerNote,
+      ...(notificationConsent ? { fcmToken: fcmToken || null, notificationConsent: true, platform } : {}),
     },
   })
 }

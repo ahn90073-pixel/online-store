@@ -2,7 +2,16 @@ import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 
 const FCM_TOKEN_STORAGE_KEY = 'online-store-fcm-token';
+const FCM_PERMISSION_STATE_KEY = 'online-store-fcm-permission-state';
 let initializationPromise = null;
+
+function savePermissionState(state) {
+  try {
+    localStorage.setItem(FCM_PERMISSION_STATE_KEY, state);
+  } catch {
+    // Permission state persistence should not block registration.
+  }
+}
 
 function publishToken(token) {
   try {
@@ -37,8 +46,10 @@ export async function initializePushNotifications({ onToken, onNotification, onA
 
       if (receive !== 'granted') {
         console.warn('[Push] Notification permission was not granted:', receive);
+        savePermissionState(receive || 'denied');
         return { enabled: false, reason: 'permission-denied' };
       }
+      savePermissionState('granted');
 
       if (Capacitor.getPlatform() === 'android') {
         await PushNotifications.createChannel({
@@ -62,6 +73,7 @@ export async function initializePushNotifications({ onToken, onNotification, onA
         // This is the FCM token on Android and the APNs/FCM token provided by iOS.
         console.info('[Push] Device token received');
         publishToken(token.value);
+        savePermissionState('registered');
         try {
           await onToken?.(token.value);
           resolveToken(token.value);
@@ -116,6 +128,14 @@ export async function initializePushNotifications({ onToken, onNotification, onA
 export function getStoredFcmToken() {
   try {
     return localStorage.getItem(FCM_TOKEN_STORAGE_KEY) || '';
+  } catch {
+    return '';
+  }
+}
+
+export function getStoredPushPermissionState() {
+  try {
+    return localStorage.getItem(FCM_PERMISSION_STATE_KEY) || '';
   } catch {
     return '';
   }

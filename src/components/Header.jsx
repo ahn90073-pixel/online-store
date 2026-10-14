@@ -15,6 +15,7 @@ export default function Header({ categories = [], selectedCategory = 'all', onCa
     const [otaMessage, setOtaMessage] = useState('');
     const isNative = Capacitor.isNativePlatform();
     const [pushStatus, setPushStatus] = useState('idle');
+    const autoPushStarted = useRef(false);
     const catRef = useRef(null);
     useEffect(() => {
         function handleClickOutside(e) {
@@ -36,7 +37,7 @@ export default function Header({ categories = [], selectedCategory = 'all', onCa
                 onToken: (token) => registerCustomerNotificationToken({
                     token,
                     platform: Capacitor.getPlatform(),
-                    appVersion: import.meta.env.VITE_APP_VERSION || '1.0.0',
+                    appVersion: import.meta.env.VITE_APP_VERSION || '1.2.6',
                 }),
             });
             setPushStatus(result.enabled ? 'enabled' : result.reason === 'permission-denied' ? 'denied' : 'error');
@@ -45,6 +46,11 @@ export default function Header({ categories = [], selectedCategory = 'all', onCa
             setPushStatus('error');
         }
     };
+    useEffect(() => {
+        if (!isNative || autoPushStarted.current) return;
+        autoPushStarted.current = true;
+        void handlePushActivation();
+    }, [isNative]);
     const selectedCategoryLabel = selectedCategory === 'all'
         ? 'جميع الأقسام'
         : categories.find((category) => category.name === selectedCategory)?.name || selectedCategory;

@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { LocalNotifications } from '@capacitor/local-notifications';
 import { PushNotifications } from '@capacitor/push-notifications';
 
 const FCM_TOKEN_STORAGE_KEY = 'online-store-fcm-token';
@@ -40,8 +41,22 @@ export async function initializePushNotifications({ onToken, onNotification, onA
         return { enabled: false, reason: 'permission-denied' };
       }
 
+      const localPermission = await LocalNotifications.requestPermissions();
+      if (localPermission.display !== 'granted') {
+        console.warn('[Push] Local notification permission was not granted:', localPermission.display);
+      }
+
       if (Capacitor.getPlatform() === 'android') {
         await PushNotifications.createChannel({
+          id: 'store-default',
+          name: 'إشعارات المتجر',
+          description: 'تنبيهات الطلبات والعروض الجديدة',
+          importance: 5,
+          visibility: 1,
+          sound: 'default',
+          vibration: true,
+        });
+        await LocalNotifications.createChannel({
           id: 'store-default',
           name: 'إشعارات المتجر',
           description: 'تنبيهات الطلبات والعروض الجديدة',
@@ -76,6 +91,15 @@ export async function initializePushNotifications({ onToken, onNotification, onA
 
       listeners.push(await PushNotifications.addListener('pushNotificationReceived', (notification) => {
         console.info('[Push] Notification received:', notification);
+        void LocalNotifications.schedule({
+          notifications: [{
+            id: Date.now() % 2147483647,
+            title: notification.title || notification.data?.title || 'إشعار جديد',
+            body: notification.body || notification.data?.body || '',
+            channelId: 'store-default',
+            extra: notification.data || {},
+          }],
+        }).catch((error) => console.warn('[Push] Foreground local notification failed:', error));
         onNotification?.(notification);
       }));
 

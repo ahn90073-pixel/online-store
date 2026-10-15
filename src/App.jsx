@@ -4,6 +4,7 @@ import { AlertTriangle, CheckCircle2, LoaderCircle, RefreshCw } from 'lucide-rea
 import { CartProvider, useCart } from '@/context/CartContext';
 import { fetchStorefrontProducts } from '@/api/storefront';
 import Header from '@/components/Header';
+import NotificationTokenCard from '@/components/NotificationTokenCard';
 import CategoriesBar from '@/components/CategoriesBar';
 import { categories as catalogCategories } from '@/data/storeData';
 import HeroSection from '@/components/HeroSection';
@@ -132,6 +133,7 @@ function Storefront() {
     <div className="min-h-screen bg-gray-100" dir="rtl">
       <Toast message={toast.message} show={toast.show} />
       <Header categories={categories} selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} onCategoryMenuClick={() => setCategoryDrawerOpen(true)} onCartClick={() => setCartDrawerOpen(true)} onSearch={handleSearch} />
+      <NotificationTokenCard />
       <CategoriesBar categories={categories} selectedCategory={selectedCategory} hasFlashDeals={flashProducts.length > 0} showBar={false} onMenuClick={() => setCategoryDrawerOpen(true)} onCategorySelect={handleCategorySelect} drawerOpen={categoryDrawerOpen} onDrawerClose={() => setCategoryDrawerOpen(false)} />
 
       <main className="pb-8">

@@ -57,6 +57,11 @@ export default function NotificationTokenCard() {
             <p className="mt-1 text-xs leading-5 text-gray-600">
               انسخ رمز الجهاز والصقه في Firebase Console ضمن Send test message.
             </p>
+            {isNative && (
+              <p className="mt-2 text-xs leading-5 text-gray-600">
+                عند تفعيل الإشعارات، قد تُحفظ المدينة والمنطقة التقريبيتان المستنتجتان من اتصال الإنترنت لعرضهما في الإدارة. لا نطلب إذن GPS ولا نحفظ عنوان IP.
+              </p>
+            )}
             {!isNative && (
               <p className="mt-2 text-xs font-semibold text-amber-700">
                 رمز FCM يظهر داخل نسخة Android أو iOS فقط.

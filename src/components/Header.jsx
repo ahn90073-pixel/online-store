@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search, ShoppingCart, Menu, ChevronDown, Heart, Package, X, RefreshCw, Bell } from 'lucide-react';
+import { Search, ShoppingCart, Menu, ChevronDown, Heart, Package, X, Bell } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { useCart } from '@/context/CartContext';
-import { checkForOtaUpdate } from '@/ota/githubOta';
 import { initializePushNotifications } from '@/notifications/pushNotifications';
 import { registerCustomerNotificationToken } from '@/api/storefront';
 import storeIcon from '../../asset/store-icon-1024.png';
@@ -11,8 +10,6 @@ export default function Header({ categories = [], selectedCategory = 'all', onCa
     const [searchQuery, setSearchQuery] = useState('');
     const [catDropdownOpen, setCatDropdownOpen] = useState(false);
     const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
-    const [otaStatus, setOtaStatus] = useState('idle');
-    const [otaMessage, setOtaMessage] = useState('');
     const isNative = Capacitor.isNativePlatform();
     const [pushStatus, setPushStatus] = useState('idle');
     const autoPushStarted = useRef(false);
@@ -54,24 +51,6 @@ export default function Header({ categories = [], selectedCategory = 'all', onCa
     const selectedCategoryLabel = selectedCategory === 'all'
         ? 'جميع الأقسام'
         : categories.find((category) => category.name === selectedCategory)?.name || selectedCategory;
-    const handleOtaUpdate = async () => {
-        if (otaStatus === 'checking') return;
-        setOtaStatus('checking');
-        setOtaMessage('الاتصال بـ GitHub...');
-        try {
-            const result = await checkForOtaUpdate({
-                force: true,
-                onStatus: (message) => setOtaMessage(message),
-            });
-            setOtaStatus(result.skipped ? 'native-only' : result.updated ? 'updated' : 'none');
-            if (!result.updated && !result.skipped) setOtaMessage(`لا يوجد تحديث (${result.version})`);
-            if (result.skipped) setOtaMessage('هذا الزر يعمل داخل نسخة الهاتف فقط');
-        } catch (error) {
-            console.warn('[OTA] Manual update failed:', error);
-            setOtaStatus('error');
-            setOtaMessage(`فشل OTA: ${error?.message || 'خطأ غير معروف'}`);
-        }
-    };
     return (<header className="bg-white shadow-md sticky top-0 z-40">
       <div className="max-w-[1400px] mx-auto px-3 md:px-6">
         <div className="h-16 md:h-20 flex items-center gap-2 md:gap-4">
@@ -116,14 +95,8 @@ export default function Header({ categories = [], selectedCategory = 'all', onCa
 
           {/* Right actions */}
           <div className="relative flex items-center gap-1 md:gap-3 mr-auto md:mr-0">
-            {/* Manual OTA update */}
-            <button onClick={handleOtaUpdate} disabled={otaStatus === 'checking'} className="flex items-center gap-1 px-2 py-2 text-xs sm:text-sm font-bold text-brand-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors disabled:opacity-60" aria-label="فحص تحديث جديد" title="فحص تحديث جديد">
-              <RefreshCw size={16} className={otaStatus === 'checking' ? 'animate-spin' : ''}/>
-              <span className="hidden sm:inline">{otaStatus === 'checking' ? 'جاري الفحص' : 'تحديث'}</span>
-            </button>
-            {otaMessage && <span className={`absolute top-full left-2 mt-1 z-50 max-w-[220px] rounded-lg px-2 py-1 text-[10px] shadow-lg ${otaStatus === 'error' ? 'bg-red-600 text-white' : 'bg-gray-800 text-white'}`} role="status">{otaMessage}</span>}
-            {isNative && <button type="button" onClick={handlePushActivation} disabled={pushStatus === 'activating'} className="flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-2 text-xs font-bold text-emerald-700 transition-colors hover:bg-emerald-100 disabled:cursor-default disabled:opacity-70 sm:text-sm" aria-label="تفعيل إشعارات الطلبات" title="تفعيل إشعارات الطلبات">
-              <Bell size={16} />
+            {isNative && <button type="button" onClick={handlePushActivation} disabled={pushStatus === 'activating'} className="flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-xl bg-emerald-50 px-2.5 py-2 text-xs font-bold text-emerald-700 transition-colors hover:bg-emerald-100 disabled:cursor-default disabled:opacity-70 sm:text-sm" aria-label="تفعيل إشعارات الطلبات" title="تفعيل إشعارات الطلبات">
+              <Bell size={24} strokeWidth={2.4} />
               <span className="hidden sm:inline">{pushStatus === 'activating' ? 'جارٍ التفعيل' : pushStatus === 'enabled' ? 'الإشعارات مفعلة' : pushStatus === 'denied' ? 'السماح بالإشعارات' : pushStatus === 'error' ? 'إعادة المحاولة' : 'تفعيل الإشعارات'}</span>
             </button>}
 

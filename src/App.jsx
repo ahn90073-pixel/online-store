@@ -1,10 +1,9 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, CheckCircle2, LoaderCircle, RefreshCw } from 'lucide-react';
 import { CartProvider, useCart } from '@/context/CartContext';
 import { fetchStorefrontProducts } from '@/api/storefront';
 import Header from '@/components/Header';
-import NotificationTokenCard from '@/components/NotificationTokenCard';
 import CategoriesBar from '@/components/CategoriesBar';
 import { categories as catalogCategories } from '@/data/storeData';
 import HeroSection from '@/components/HeroSection';
@@ -35,6 +34,10 @@ function Storefront() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState({ show: false, message: '' });
+  const touchStartY = useRef(null);
+  const pullDistance = useRef(0);
+  const [pullOffset, setPullOffset] = useState(0);
+  const [pullRefreshing, setPullRefreshing] = useState(false);
 
   const loadProducts = useCallback(async () => {
     setProductsLoading(true);
@@ -50,6 +53,17 @@ function Storefront() {
   }, []);
 
   useEffect(() => { void loadProducts(); }, [loadProducts]);
+  useEffect(() => {
+    const handleTouchMove = (event) => {
+      if (touchStartY.current === null || productsLoading) return;
+      const distance = Math.max(0, Math.min(event.touches[0].clientY - touchStartY.current, 96));
+      pullDistance.current = distance;
+      setPullOffset(distance);
+      if (distance > 0 && window.scrollY <= 1 && event.cancelable) event.preventDefault();
+    };
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    return () => window.removeEventListener('touchmove', handleTouchMove);
+  }, [productsLoading]);
   useEffect(() => {
     if (!toast.show) return undefined;
     const timer = setTimeout(() => setToast({ show: false, message: '' }), 2500);
@@ -109,6 +123,22 @@ function Storefront() {
     setSearchQuery(query);
     setSelectedCategory('all');
   }, []);
+  const handleTouchStart = useCallback((event) => {
+    if (window.scrollY <= 1 && !productsLoading) {
+      touchStartY.current = event.touches[0].clientY;
+      pullDistance.current = 0;
+    }
+  }, [productsLoading]);
+  const handleTouchEnd = useCallback(async () => {
+    const shouldRefresh = pullDistance.current >= 72;
+    touchStartY.current = null;
+    pullDistance.current = 0;
+    setPullOffset(0);
+    if (!shouldRefresh) return;
+    setPullRefreshing(true);
+    await loadProducts();
+    setPullRefreshing(false);
+  }, [loadProducts]);
 
   const filteredProducts = allProducts.filter((product) => {
     const matchesCategory = selectedCategory === 'all'
@@ -133,10 +163,10 @@ function Storefront() {
     <div className="min-h-screen bg-gray-100" dir="rtl">
       <Toast message={toast.message} show={toast.show} />
       <Header categories={categories} selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} onCategoryMenuClick={() => setCategoryDrawerOpen(true)} onCartClick={() => setCartDrawerOpen(true)} onSearch={handleSearch} />
-      <NotificationTokenCard />
       <CategoriesBar categories={categories} selectedCategory={selectedCategory} hasFlashDeals={flashProducts.length > 0} showBar={false} onMenuClick={() => setCategoryDrawerOpen(true)} onCategorySelect={handleCategorySelect} drawerOpen={categoryDrawerOpen} onDrawerClose={() => setCategoryDrawerOpen(false)} />
 
-      <main className="pb-8">
+      <main className="pb-8" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+        {(pullOffset > 0 || pullRefreshing) && <div className="mx-auto mt-2 flex h-10 items-center justify-center gap-2 text-sm font-semibold text-brand-700" role="status" aria-live="polite"><LoaderCircle size={18} className={pullRefreshing || pullOffset >= 72 ? 'animate-spin' : ''} />{pullRefreshing ? 'جارٍ تحديث المنتجات...' : pullOffset >= 72 ? 'أفلت للتحديث' : 'اسحب لأسفل لتحديث المنتجات'}</div>}
         {productsLoading && <div className="mx-auto mt-5 flex max-w-7xl items-center justify-center gap-2 rounded-xl bg-white p-5 text-sm text-gray-600 shadow-sm"><LoaderCircle size={18} className="animate-spin text-brand-700" />جارٍ تحميل المنتجات المعتمدة من المتجر...</div>}
         {productsError && <div role="alert" className="mx-3 mt-5 flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 md:mx-6 md:flex-row md:items-center md:justify-between"><span><AlertTriangle size={17} className="ml-2 inline" />{productsError}</span><button type="button" onClick={loadProducts} className="flex items-center justify-center gap-2 rounded-lg bg-amber-800 px-4 py-2 font-semibold text-white hover:bg-amber-900"><RefreshCw size={15} />إعادة المحاولة</button></div>}
         {!productsLoading && !productsError && allProducts.length === 0 && <p className="mx-3 mt-5 rounded-xl bg-white p-5 text-center text-sm text-gray-600 shadow-sm md:mx-6">لا توجد منتجات معتمدة للعرض حاليًا.</p>}

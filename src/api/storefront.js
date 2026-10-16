@@ -1,11 +1,13 @@
 const DEFAULT_STORE_API_BASE = 'https://tagerbackend.ahn90073.workers.dev/api/storefront'
 const STORE_API_BASE = (import.meta.env.VITE_STORE_API_BASE_URL || DEFAULT_STORE_API_BASE).replace(/\/+$/, '')
+const DEFAULT_AUDIENCE_API_BASE = 'https://neon-store-api.zazotona301.workers.dev'
+const AUDIENCE_API_BASE = (import.meta.env.VITE_AUDIENCE_API_BASE_URL || DEFAULT_AUDIENCE_API_BASE).replace(/\/+$/, '')
 
-async function request(path, { method = 'GET', body } = {}) {
+async function request(path, { method = 'GET', body, base = STORE_API_BASE } = {}) {
   const controller = new AbortController()
   const timeout = window.setTimeout(() => controller.abort(), 25000)
   try {
-    const response = await fetch(`${STORE_API_BASE}${path}`, {
+    const response = await fetch(`${base}${path}`, {
       method,
       headers: {
         Accept: 'application/json',
@@ -106,9 +108,10 @@ export function createStoreOrder({ customer, address, items, customerNote = '', 
 }
 
 export function registerCustomerNotificationToken({ token, platform, appVersion }) {
-  return request('/notifications/token', {
+  return request('/api/v1/notifications/token', {
     method: 'POST',
     body: { token, platform, appVersion },
+    base: AUDIENCE_API_BASE,
   })
 }
 

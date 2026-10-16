@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, CheckCircle2, LoaderCircle, RefreshCw } from 'lucide-react';
 import { CartProvider, useCart } from '@/context/CartContext';
 import { fetchStorefrontProducts } from '@/api/storefront';
+import { readCachedStorefrontProducts, saveCachedStorefrontProducts } from '@/api/storefrontProductCache';
 import Header from '@/components/Header';
 import CategoriesBar from '@/components/CategoriesBar';
 import { categories as catalogCategories } from '@/data/storeData';
@@ -40,13 +41,24 @@ function Storefront() {
   const [pullRefreshing, setPullRefreshing] = useState(false);
 
   const loadProducts = useCallback(async () => {
-    setProductsLoading(true);
     setProductsError('');
+    const cachedProducts = await readCachedStorefrontProducts();
+    if (cachedProducts === null) setProductsLoading(true);
+    else {
+      setAllProducts(cachedProducts);
+      setProductsLoading(false);
+    }
     try {
-      setAllProducts(await fetchStorefrontProducts());
+      const products = await fetchStorefrontProducts();
+      setAllProducts(products);
+      await saveCachedStorefrontProducts(products);
     } catch (error) {
-      setProductsError(error.message || 'تعذر تحميل منتجات المتجر.');
-      setAllProducts([]);
+      if (cachedProducts !== null) {
+        setProductsError('تعذر الاتصال الآن؛ نعرض آخر نسخة منتجات محفوظة على هذا الجهاز.');
+      } else {
+        setProductsError(error.message || 'تعذر تحميل منتجات المتجر.');
+        setAllProducts([]);
+      }
     } finally {
       setProductsLoading(false);
     }

@@ -6,11 +6,11 @@ on:
       tag_name:
         description: Git tag for the public release
         required: true
-        default: v1.2.3
+        default: v1.2.7
       release_name:
         description: Public GitHub Release title
         required: true
-        default: سوق اون لين v1.2.3
+        default: سوق اون لاين v1.2.7
 
 permissions:
   contents: write
@@ -75,7 +75,7 @@ jobs:
 
       - name: Install dependencies and build web app
         env:
-          VITE_APP_VERSION: 1.2.6
+          VITE_APP_VERSION: 1.2.7
         run: npm ci && npm run build && npx cap sync android
 
       - name: Setup Java

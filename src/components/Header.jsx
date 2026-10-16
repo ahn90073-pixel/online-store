@@ -34,7 +34,7 @@ export default function Header({ categories = [], selectedCategory = 'all', onCa
                 onToken: (token) => registerCustomerNotificationToken({
                     token,
                     platform: Capacitor.getPlatform(),
-                    appVersion: import.meta.env.VITE_APP_VERSION || '1.2.6',
+                    appVersion: import.meta.env.VITE_APP_VERSION || '1.2.7',
                 }),
             });
             setPushStatus(result.enabled ? 'enabled' : result.reason === 'permission-denied' ? 'denied' : 'error');

@@ -6,7 +6,7 @@ import { createStoreOrder } from '@/api/storefront';
 import { getStoredFcmToken } from '@/notifications/pushNotifications';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const emptyCustomer = { fullName: '', phone: '', email: '' };
+const emptyCustomer = { fullName: '', phone: '', whatsapp: '', email: '' };
 const emptyAddress = { country: 'Egypt', governorate: '', city: '', district: '', street: '', building: '', apartment: '', postalCode: '', notes: '' };
 
 function TextField({ label, value, onChange, required = false, type = 'text', placeholder = '' }) {
@@ -51,7 +51,7 @@ export default function CartDrawer({ open, onClose }) {
     setError('');
     try {
       const result = await createStoreOrder({
-        customer: { ...customer, fullName: customer.fullName.trim(), phone: customer.phone.trim(), email: customer.email.trim() },
+        customer: { ...customer, fullName: customer.fullName.trim(), phone: customer.phone.trim(), whatsapp: customer.whatsapp.trim(), email: customer.email.trim() },
         address: { ...address, governorate: address.governorate.trim(), city: address.city.trim(), street: address.street.trim() },
         items: cartItems,
         customerNote: customerNote.trim(),
@@ -99,6 +99,7 @@ export default function CartDrawer({ open, onClose }) {
                   <section className="space-y-3"><h3 className="font-bold text-gray-900">بيانات العميل</h3>
                     <TextField label="الاسم بالكامل" value={customer.fullName} onChange={updateCustomer('fullName')} required placeholder="الاسم الذي يستلم الطلب" />
                     <div className="grid grid-cols-2 gap-3"><TextField label="رقم الهاتف" value={customer.phone} onChange={updateCustomer('phone')} required type="tel" placeholder="01xxxxxxxxx" /><TextField label="البريد الإلكتروني" value={customer.email} onChange={updateCustomer('email')} type="email" placeholder="اختياري" /></div>
+                    <TextField label="رقم واتساب" value={customer.whatsapp} onChange={updateCustomer('whatsapp')} type="tel" placeholder="اختياري — مثال: 2010xxxxxxxx" />
                   </section>
                   <section className="space-y-3 border-t border-gray-100 pt-4"><h3 className="font-bold text-gray-900">عنوان التوصيل</h3>
                     <div className="grid grid-cols-2 gap-3"><TextField label="المحافظة" value={address.governorate} onChange={updateAddress('governorate')} required /><TextField label="المدينة" value={address.city} onChange={updateAddress('city')} required /></div>

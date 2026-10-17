@@ -4,9 +4,11 @@ import { Capacitor } from '@capacitor/core';
 import { useCart } from '@/context/CartContext';
 import { createStoreOrder } from '@/api/storefront';
 import { getStoredFcmToken } from '@/notifications/pushNotifications';
+import { countryCallingCodes } from '@/data/countryCallingCodes';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const emptyCustomer = { fullName: '', phone: '', whatsapp: '', email: '' };
+const defaultWhatsappCountryCode = '+20';
 const emptyAddress = { country: 'Egypt', governorate: '', city: '', district: '', street: '', building: '', apartment: '', postalCode: '', notes: '' };
 
 function TextField({ label, value, onChange, required = false, type = 'text', placeholder = '' }) {
@@ -22,6 +24,7 @@ export default function CartDrawer({ open, onClose }) {
   const { cartItems, cartCount, removeFromCart, updateQuantity, clearCart } = useCart();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [customer, setCustomer] = useState(emptyCustomer);
+  const [whatsappCountryCode, setWhatsappCountryCode] = useState(defaultWhatsappCountryCode);
   const [address, setAddress] = useState(emptyAddress);
   const [customerNote, setCustomerNote] = useState('');
   const [notificationConsent, setNotificationConsent] = useState(false);
@@ -51,7 +54,7 @@ export default function CartDrawer({ open, onClose }) {
     setError('');
     try {
       const result = await createStoreOrder({
-        customer: { ...customer, fullName: customer.fullName.trim(), phone: customer.phone.trim(), whatsapp: customer.whatsapp.trim(), email: customer.email.trim() },
+        customer: { ...customer, fullName: customer.fullName.trim(), phone: customer.phone.trim(), whatsapp: customer.whatsapp.trim() ? `${whatsappCountryCode}${customer.whatsapp.trim().replace(/^\+/, '')}` : '', email: customer.email.trim() },
         address: { ...address, governorate: address.governorate.trim(), city: address.city.trim(), street: address.street.trim() },
         items: cartItems,
         customerNote: customerNote.trim(),
@@ -99,7 +102,7 @@ export default function CartDrawer({ open, onClose }) {
                   <section className="space-y-3"><h3 className="font-bold text-gray-900">بيانات العميل</h3>
                     <TextField label="الاسم بالكامل" value={customer.fullName} onChange={updateCustomer('fullName')} required placeholder="الاسم الذي يستلم الطلب" />
                     <div className="grid grid-cols-2 gap-3"><TextField label="رقم الهاتف" value={customer.phone} onChange={updateCustomer('phone')} required type="tel" placeholder="01xxxxxxxxx" /><TextField label="البريد الإلكتروني" value={customer.email} onChange={updateCustomer('email')} type="email" placeholder="اختياري" /></div>
-                    <TextField label="رقم واتساب" value={customer.whatsapp} onChange={updateCustomer('whatsapp')} type="tel" placeholder="اختياري — مثال: 2010xxxxxxxx" />
+                    <label className="block min-w-0 space-y-1"><span className="text-xs font-semibold text-gray-700">رقم واتساب <span className="font-normal text-gray-500">(اختياري)</span></span><div className="flex gap-2"><select aria-label="مفتاح دولة واتساب" value={whatsappCountryCode} onChange={(event) => setWhatsappCountryCode(event.target.value)} className="w-[7.5rem] shrink-0 rounded-lg border border-gray-200 bg-white px-2 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-blue-100">{countryCallingCodes.map(({ name, code }) => <option key={`${name}-${code}`} value={code}>{name} ({code})</option>)}</select><input className="min-w-0 flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-blue-100" type="tel" inputMode="tel" value={customer.whatsapp} onChange={updateCustomer('whatsapp')} placeholder="الرقم المحلي" autoComplete="tel-national" /></div><span className="block text-[11px] text-gray-500">سيُرسل الرقم بالصيغة الدولية: {whatsappCountryCode} + الرقم المحلي</span></label>
                   </section>
                   <section className="space-y-3 border-t border-gray-100 pt-4"><h3 className="font-bold text-gray-900">عنوان التوصيل</h3>
                     <div className="grid grid-cols-2 gap-3"><TextField label="المحافظة" value={address.governorate} onChange={updateAddress('governorate')} required /><TextField label="المدينة" value={address.city} onChange={updateAddress('city')} required /></div>

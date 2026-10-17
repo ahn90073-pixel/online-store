@@ -3,19 +3,19 @@ import storeIcon from '../../asset/store-icon-1024.png';
 const footerLinks = [
     {
         title: 'عن المتجر',
-        links: ['من نحن', 'تواصل معنا', 'الوظائف', 'المدونة', 'آراء العملاء'],
+        links: [{ label: 'من نحن', slug: 'about' }, { label: 'تواصل معنا', slug: 'contact' }, { label: 'الوظائف', pending: true }, { label: 'المدونة', slug: 'blog' }, { label: 'آراء العملاء', pending: true }],
     },
     {
         title: 'خدمة العملاء',
-        links: ['سياسة الشحن والتوصيل', 'سياسة الاسترجاع والاستبدال', 'الأسئلة الشائعة', 'تتبع طلبك', 'الدعم الفني'],
+        links: [{ label: 'سياسة الشحن والتوصيل', slug: 'shipping' }, { label: 'سياسة الاسترجاع والاستبدال', slug: 'returns' }, { label: 'الأسئلة الشائعة', slug: 'faq' }, { label: 'تتبع طلبك', slug: 'tracking' }, { label: 'الدعم الفني', slug: 'support' }],
     },
     {
         title: 'بيع معنا',
-        links: ['انضم كتاجر', 'دليل التاجر', 'شروط التسعير', 'العمولات والرسوم', 'تسجيل دخول التجار'],
+        links: [{ label: 'انضم كتاجر', pending: true }, { label: 'دليل التاجر', slug: 'sellerGuide' }, { label: 'شروط التسعير', slug: 'pricing' }, { label: 'العمولات والرسوم', slug: 'fees' }, { label: 'تسجيل دخول التجار', pending: true }],
     },
     {
         title: 'الشروط والأحكام',
-        links: ['شروط الاستخدام', 'سياسة الخصوصية', 'ملفات الارتباط', 'حقوق الملكية الفكرية', 'إخلاء المسؤولية'],
+        links: [{ label: 'شروط الاستخدام', slug: 'terms' }, { label: 'سياسة الخصوصية', slug: 'privacy' }, { label: 'ملفات الارتباط', slug: 'cookies' }, { label: 'حقوق الملكية الفكرية', slug: 'intellectualProperty' }, { label: 'إخلاء المسؤولية', slug: 'disclaimer' }],
     },
 ];
 const paymentMethods = ['Visa', 'Mastercard', 'Vodafone Cash', 'InstaPay', 'الدفع عند الاستلام'];
@@ -74,10 +74,10 @@ export default function Footer() {
           {footerLinks.map((section) => (<div key={section.title}>
               <h4 className="font-bold text-white text-sm mb-3">{section.title}</h4>
               <ul className="space-y-2">
-                {section.links.map((link) => (<li key={link}>
-                    <a href="#" className="text-sm text-gray-400 hover:text-accent-400 transition-colors">
-                      {link}
-                    </a>
+                {section.links.map((link) => (<li key={link.label}>
+                    {link.pending ? <span className="cursor-not-allowed text-sm text-gray-600" title="سيتم إضافة الرابط لاحقاً">{link.label} <span className="text-[10px] text-gray-500">(قريباً)</span></span> : <a href={`#${link.slug}`} className="text-sm text-gray-400 transition-colors hover:text-accent-400">
+                      {link.label}
+                    </a>}
                   </li>))}
               </ul>
             </div>))}

@@ -14,6 +14,8 @@ import TrustBadges from '@/components/TrustBadges';
 import Footer from '@/components/Footer';
 import CartDrawer from '@/components/CartDrawer';
 import StartupSplash from '@/components/StartupSplash';
+import ContentPage from '@/components/ContentPage';
+import { contentPages } from '@/data/contentPages';
 import { exitAndroidApp, registerAndroidBackButton } from '@/utils/androidBackButton';
 
 function Toast({ message, show }) {
@@ -151,6 +153,15 @@ function Storefront() {
   </>;
 }
 
-function App() { return <AppErrorBoundary><CartProvider><Storefront /></CartProvider></AppErrorBoundary>; }
+function App() {
+  const [pageSlug, setPageSlug] = useState(() => window.location.hash.slice(1));
+  useEffect(() => {
+    const handleHashChange = () => { setPageSlug(window.location.hash.slice(1)); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+  const isContentPage = Boolean(contentPages[pageSlug]);
+  return <AppErrorBoundary><CartProvider>{isContentPage ? <ContentPage slug={pageSlug} /> : <Storefront />}</CartProvider></AppErrorBoundary>;
+}
 export default App;
 export { AppErrorBoundary };

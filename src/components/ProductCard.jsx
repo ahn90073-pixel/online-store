@@ -29,7 +29,7 @@ export default function ProductCard({ product, onAddToCart, compact }) {
     const handleFavorite = () => {
         setIsFavorite(!isFavorite);
         setHeartAnim(true);
-        setTimeout(() => setHeartAnim(false), 400);
+        window.setTimeout(() => setHeartAnim(false), 400);
     };
     const handleAddToCart = () => {
         onAddToCart(product);
@@ -52,7 +52,7 @@ export default function ProductCard({ product, onAddToCart, compact }) {
 
         {/* Product image with zoom effect */}
         <button type="button" onClick={() => productImages.length && setGalleryOpen(true)} disabled={!productImages.length} className="absolute inset-0 z-0 flex h-full w-full items-center justify-center p-4 disabled:cursor-default" aria-label={`عرض صور ${product.name}`}>
-          {currentImage ? <img src={currentImage} alt={product.name} loading="lazy" className="zoom-img h-full w-full object-contain"/> : <span className="text-sm text-gray-400">لا توجد صورة</span>}
+          {currentImage ? <img src={currentImage} alt={product.name} loading="lazy" decoding="async" fetchPriority="low" className="zoom-img h-full w-full object-contain" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.style.visibility = 'hidden'; }} /> : <span className="text-sm text-gray-400">لا توجد صورة</span>}
         </button>
 
         {productImages.length > 0 && <span className="pointer-events-none absolute left-1/2 top-2 z-[1] -translate-x-1/2 rounded-full bg-black/55 px-2 py-1 text-[10px] font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
@@ -119,7 +119,7 @@ export default function ProductCard({ product, onAddToCart, compact }) {
         <button type="button" onClick={() => setGalleryOpen(false)} className="absolute left-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25" aria-label="إغلاق معرض الصور"><X size={24}/></button>
         <div className="flex h-full w-full max-w-6xl flex-col items-center justify-center gap-3">
           <div className="relative flex min-h-0 flex-1 items-center justify-center w-full">
-            <img src={productImages[activeImageIndex]} alt={`${product.name} — الصورة ${activeImageIndex + 1}`} className="max-h-full max-w-full select-none object-contain" />
+            <img src={productImages[activeImageIndex]} alt={`${product.name} — الصورة ${activeImageIndex + 1}`} loading="eager" decoding="async" className="max-h-full max-w-full select-none object-contain" />
             {productImages.length > 1 && <>
               <button type="button" onClick={() => moveImage(-1)} className="absolute right-1 md:right-4 flex h-11 w-11 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70" aria-label="الصورة السابقة"><ChevronRight size={26}/></button>
               <button type="button" onClick={() => moveImage(1)} className="absolute left-1 md:left-4 flex h-11 w-11 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70" aria-label="الصورة التالية"><ChevronLeft size={26}/></button>

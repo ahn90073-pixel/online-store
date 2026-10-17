@@ -17,8 +17,8 @@ export default function ProductGrid({ title, subtitle, products, onAddToCart, sh
         </div>
 
         {/* Grid */}
-        {products.length === 0 ? <div className="rounded-xl bg-gray-50 p-8 text-center text-sm text-gray-500">لا توجد منتجات مطابقة لهذا الاختيار.</div> : <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-          {products.map((product, i) => (<motion.div key={product.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-50px' }} transition={{ delay: i * 0.05 }}>
+        {products.length === 0 ? <div className="rounded-xl bg-gray-50 p-8 text-center text-sm text-gray-500">لا توجد منتجات مطابقة لهذا الاختيار.</div> : <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
+          {products.map((product) => (<motion.div key={`${product.vendorId || 'catalog'}:${product.productId || product.id}`} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '120px' }} transition={{ duration: 0.2 }} style={{ contentVisibility: 'auto', containIntrinsicSize: '320px' }}>
               <ProductCard product={product} onAddToCart={onAddToCart}/>
             </motion.div>))}
         </div>}

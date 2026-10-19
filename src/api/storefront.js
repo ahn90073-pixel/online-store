@@ -60,6 +60,29 @@ export async function fetchStorefrontProductsPage({ search = '', category = '', 
   return { items: rawItems.map(mapStoreProduct), page, totalPages, hasMore: page < totalPages }
 }
 
+const PROMOTION_MEDIA_TYPES = new Set(['image', 'video'])
+const PROMOTION_THEMES = new Set(['blue', 'orange', 'slate', 'violet'])
+
+function mapStorefrontPromotion(promotion) {
+  return {
+    id: promotion?.id,
+    title: promotion?.title || '',
+    subtitle: promotion?.subtitle || '',
+    description: promotion?.description || '',
+    ctaLabel: promotion?.ctaLabel || '',
+    targetUrl: promotion?.targetUrl || '',
+    mediaUrl: promotion?.mediaUrl || '',
+    mediaType: PROMOTION_MEDIA_TYPES.has(promotion?.mediaType) ? promotion.mediaType : 'image',
+    theme: PROMOTION_THEMES.has(promotion?.theme) ? promotion.theme : 'blue',
+  }
+}
+
+export async function fetchStorefrontPromotions({ signal } = {}) {
+  const result = await request('/promotions', { signal })
+  const rawItems = Array.isArray(result) ? result : (Array.isArray(result?.items) ? result.items : [])
+  return rawItems.filter((promotion) => promotion && typeof promotion === 'object').map(mapStorefrontPromotion)
+}
+
 // Kept for callers that need a complete export; the storefront itself uses page loading.
 export async function fetchStorefrontProducts(options = {}) {
   const first = await fetchStorefrontProductsPage(options)

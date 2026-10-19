@@ -1,7 +1,5 @@
 const DEFAULT_STORE_API_BASE = 'https://tagerbackend.ahn90073.workers.dev/api/storefront'
 const STORE_API_BASE = (import.meta.env.VITE_STORE_API_BASE_URL || DEFAULT_STORE_API_BASE).replace(/\/+$/, '')
-const DEFAULT_AUDIENCE_API_BASE = 'https://neon-store-api.zazotona301.workers.dev'
-const AUDIENCE_API_BASE = (import.meta.env.VITE_AUDIENCE_API_BASE_URL || DEFAULT_AUDIENCE_API_BASE).replace(/\/+$/, '')
 
 async function request(path, { method = 'GET', body, base = STORE_API_BASE, signal } = {}) {
   const controller = new AbortController()
@@ -95,8 +93,8 @@ export function createStoreOrder({ customer, address, items, customerNote = '', 
   return request('/checkout', { method: 'POST', body: { customer, address, items: items.map((item) => ({ productId: item.productId, vendorId: item.vendorId, quantity: item.quantity })), customerNote, ...(notificationConsent ? { fcmToken: fcmToken || null, notificationConsent: true, platform } : {}) } })
 }
 
-export function registerCustomerNotificationToken({ token, platform, appVersion }) {
-  return request('/api/v1/notifications/token', { method: 'POST', body: { token, platform, appVersion }, base: AUDIENCE_API_BASE })
+export function registerCustomerNotificationToken({ token, platform, appVersion, governorate }) {
+  return request('/notifications/token', { method: 'POST', body: { token, platform, appVersion, ...(governorate ? { governorate } : {}) } })
 }
 
 export { STORE_API_BASE }

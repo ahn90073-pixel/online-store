@@ -5,6 +5,7 @@ import { useCart } from '@/context/CartContext';
 import { createStoreOrder } from '@/api/storefront';
 import { getStoredFcmToken } from '@/notifications/pushNotifications';
 import { countryCallingCodes } from '@/data/countryCallingCodes';
+import { EGYPT_GOVERNORATES } from '@/data/egyptGovernorates';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const emptyCustomer = { fullName: '', phone: '', whatsapp: '', email: '' };
@@ -105,7 +106,7 @@ export default function CartDrawer({ open, onClose }) {
                     <label className="block min-w-0 space-y-1"><span className="text-xs font-semibold text-gray-700">رقم واتساب <span className="font-normal text-gray-500">(اختياري)</span></span><div className="flex gap-2"><select aria-label="مفتاح دولة واتساب" value={whatsappCountryCode} onChange={(event) => setWhatsappCountryCode(event.target.value)} className="w-[7.5rem] shrink-0 rounded-lg border border-gray-200 bg-white px-2 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-blue-100">{countryCallingCodes.map(({ name, code }) => <option key={`${name}-${code}`} value={code}>{name} ({code})</option>)}</select><input className="min-w-0 flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-blue-100" type="tel" inputMode="tel" value={customer.whatsapp} onChange={updateCustomer('whatsapp')} placeholder="الرقم المحلي" autoComplete="tel-national" /></div><span className="block text-[11px] text-gray-500">سيُرسل الرقم بالصيغة الدولية: {whatsappCountryCode} + الرقم المحلي</span></label>
                   </section>
                   <section className="space-y-3 border-t border-gray-100 pt-4"><h3 className="font-bold text-gray-900">عنوان التوصيل</h3>
-                    <div className="grid grid-cols-2 gap-3"><TextField label="المحافظة" value={address.governorate} onChange={updateAddress('governorate')} required /><TextField label="المدينة" value={address.city} onChange={updateAddress('city')} required /></div>
+                    <div className="grid grid-cols-2 gap-3"><label className="block min-w-0 space-y-1"><span className="text-xs font-semibold text-gray-700">المحافظة <span className="text-red-600">*</span></span><select className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-blue-100" value={address.governorate} onChange={updateAddress('governorate')} required><option value="">اختر المحافظة</option>{EGYPT_GOVERNORATES.map((governorate) => <option key={governorate} value={governorate}>{governorate}</option>)}</select></label><TextField label="المدينة" value={address.city} onChange={updateAddress('city')} required /></div>
                     <TextField label="الحي / المنطقة" value={address.district} onChange={updateAddress('district')} />
                     <TextField label="العنوان التفصيلي (الشارع ورقم المنزل)" value={address.street} onChange={updateAddress('street')} required placeholder="الشارع، علامة مميزة، إلخ" />
                     <div className="grid grid-cols-2 gap-3"><TextField label="المبنى" value={address.building} onChange={updateAddress('building')} /><TextField label="الشقة" value={address.apartment} onChange={updateAddress('apartment')} /></div>

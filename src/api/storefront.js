@@ -1,9 +1,11 @@
 const DEFAULT_STORE_API_BASE = 'https://tagerbackend.ahn90073.workers.dev/api/storefront'
 const STORE_API_BASE = (import.meta.env.VITE_STORE_API_BASE_URL || DEFAULT_STORE_API_BASE).replace(/\/+$/, '')
+const DEFAULT_AUDIENCE_API_BASE = 'https://neon-store-api.zazotona301.workers.dev'
+const AUDIENCE_API_BASE = (import.meta.env.VITE_AUDIENCE_API_BASE_URL || DEFAULT_AUDIENCE_API_BASE).replace(/\/+$/, '')
 
-async function request(path, { method = 'GET', body, base = STORE_API_BASE, signal } = {}) {
+async function request(path, { method = 'GET', body, base = STORE_API_BASE, signal, timeoutMs = 25000 } = {}) {
   const controller = new AbortController()
-  const timeout = window.setTimeout(() => controller.abort(), 25000)
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs)
   const abort = () => controller.abort()
   signal?.addEventListener('abort', abort, { once: true })
   try {
@@ -94,7 +96,7 @@ export function createStoreOrder({ customer, address, items, customerNote = '', 
 }
 
 export function registerCustomerNotificationToken({ token, platform, appVersion, governorate }) {
-  return request('/notifications/token', { method: 'POST', body: { token, platform, appVersion, ...(governorate ? { governorate } : {}) } })
+  return request('/api/v1/notifications/token', { method: 'POST', body: { token, platform, appVersion, ...(governorate ? { governorate } : {}) }, base: AUDIENCE_API_BASE, timeoutMs: 5000 })
 }
 
 export { STORE_API_BASE }

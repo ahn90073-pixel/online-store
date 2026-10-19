@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { X, Plus, Minus, Trash2, ShoppingCart, ShoppingBag, LoaderCircle, CheckCircle2, Truck } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { useCart } from '@/context/CartContext';
-import { createStoreOrder } from '@/api/storefront';
+import { createStoreOrder, registerCustomerNotificationToken } from '@/api/storefront';
 import { getStoredFcmToken } from '@/notifications/pushNotifications';
 import { countryCallingCodes } from '@/data/countryCallingCodes';
 import { EGYPT_GOVERNORATES } from '@/data/egyptGovernorates';
@@ -65,6 +65,15 @@ export default function CartDrawer({ open, onClose }) {
           platform: Capacitor.isNativePlatform() ? Capacitor.getPlatform() : 'web',
         } : {}),
       });
+      const fcmToken = getStoredFcmToken();
+      if (fcmToken) {
+        await registerCustomerNotificationToken({
+          token: fcmToken,
+          platform: Capacitor.isNativePlatform() ? Capacitor.getPlatform() : 'web',
+          appVersion: import.meta.env.VITE_APP_VERSION || 'unknown',
+          governorate: address.governorate.trim(),
+        }).catch(() => console.warn('Customer notification governorate could not be updated.'));
+      }
       setSubmittedOrders(result?.orders || []);
       clearCart();
     } catch (submitError) {
